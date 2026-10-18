@@ -42,6 +42,31 @@
       "path": "assets/source/eyes/materials/brown_eye.png",
       "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b",
       "source_path": "makehuman/data/eyes/materials/brown_eye.png"
+    },
+    {
+      "path": "assets/source/targets/macrodetails/universal-female-young-averagemuscle-maxweight.target",
+      "sha256": "3648e7f9b34d947726161b563b90ba92b29860bac4c4f82aea3cec37bad2bb4e",
+      "source_path": "makehuman/data/targets/macrodetails/universal-female-young-averagemuscle-maxweight.target"
+    },
+    {
+      "path": "assets/source/targets/breast/nipple-point-decr.target",
+      "sha256": "0f4fe64476e45dfc77a302bf373dffc33dc6b5f1b256589e3f74e23ce1fba120",
+      "source_path": "makehuman/data/targets/breast/nipple-point-decr.target"
+    },
+    {
+      "path": "assets/source/targets/breast/nipple-size-decr.target",
+      "sha256": "af1a11c39faaef789dc0c9e9a88f9dc2f703df460a07a0c17a7d849dbd268d5c",
+      "source_path": "makehuman/data/targets/breast/nipple-size-decr.target"
+    },
+    {
+      "path": "assets/source/targets/armslegs/l-upperarm-shoulder-muscle-incr.target",
+      "sha256": "0d1994d9d45b5f7b5d4884262514fee53c6fd111bce1cc931a6fcb69f60aa8b6",
+      "source_path": "makehuman/data/targets/armslegs/l-upperarm-shoulder-muscle-incr.target"
+    },
+    {
+      "path": "assets/source/targets/armslegs/r-upperarm-shoulder-muscle-incr.target",
+      "sha256": "33d8d39af985071484836ebda826ab50332408256b1e6d2ab2240d480fd00295",
+      "source_path": "makehuman/data/targets/armslegs/r-upperarm-shoulder-muscle-incr.target"
     }
   ]
 }

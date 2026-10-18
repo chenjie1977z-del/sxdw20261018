@@ -6,12 +6,16 @@
 
 已提供亚洲成年女性体表的真实三维网格与离线查看器，可旋转、缩放、平移、切换标准视角、聚焦肩背、查看线框、测量两点直线距离，并导出 4K PNG。
 
+**优化版 03**：适度增加体型丰满度，以贴肤材质替换独立衣片，服装没有额外几何厚度或悬浮褶边；增加 4K 色彩贴图与微表面法线。详见 [正面](female-3d/previews/v3-front.png)、[肩背局部](female-3d/previews/v3-shoulder.png)和[优化说明](female-3d/优化版03说明.md)。
+
 现已加入**教学标注**：画笔、荧光笔、箭头、形状、文字、移动、擦除、撤销重做、多页课件，以及可编辑 `.excalidraw` 导出。先选定三维视角再标注；笔迹绑定视角快照，不随三维模型旋转。
 
 - [教学版预览](female-3d/previews/teaching-viewer.png) · [可编辑示例](female-3d/previews/teaching-demo.excalidraw)
 - [Obsidian / Excalidraw 使用教程](female-3d/Obsidian与Excalidraw教学.md) · [Obsidian 网页嵌入示例](female-3d/obsidian-live-embed.excalidraw)
 
 **[下载离线包](female-3d-offline.zip)** → 解压 → 用 Chrome / Edge 打开其中的 `female-3d/female-3d.html`。GitHub 文件页面和聊天窗口不能直接运行该查看器。
+
+新版离线包用于查看和教学，不再重复打包已内嵌在 HTML 中的原始模型；GLB、Blender 文件及开发源代码可从仓库独立下载。
 
 - [打开说明](female-3d/打开说明.md) · [GLB 模型](female-3d/assets/asian-female.glb) · [Blender 可编辑文件](female-3d/assets/asian-female.blend)
 - [正面预览](female-3d/previews/viewer-front.png) · [背面预览](female-3d/previews/viewer-back.png) · [肩背局部](female-3d/previews/viewer-shoulder.png)
@@ -22,6 +26,8 @@
 本版是体表概念样稿，不含内部骨骼，尚未经专业解剖校核；体表细分网格的平滑度不等于医学细节准确性。
 
 ## A3 印刷文件
+
+新增 **[男女精绘与 600 DPI 文件](print-600dpi/README.md)**：6 张独立全身重绘、4 张上半身/下肢精绘、两张 3072 × 1616 三视图拼版，以及 A3、9921 × 7016 的 600 DPI 输出。A3 文件含插值，原生像素及实际可印尺寸在说明中逐项列出。
 
 已提供三张精修图的 **4961 × 3508 像素、300 DPI、A3 横版**文件，采用 sRGB 色彩配置、等比例排版、约 10 mm 以上白边，不裁切人物。
 

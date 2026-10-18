@@ -1,0 +1,20 @@
+{
+  "no_separate_garment_mesh": true,
+  "explicit_tangents": true,
+  "glb_sha256": "8819faa109507ef61ce479c867fc4e1379f3f50618b23c452c7a0055db9c87ef",
+  "texture_sizes": {
+    "albedo": [
+      4096,
+      4096
+    ],
+    "normal": [
+      4096,
+      4096
+    ]
+  },
+  "clay_and_skin_restore": true,
+  "new_model_teaching_export": true,
+  "annotation_count": 2,
+  "return_to_3d": true,
+  "page_errors": []
+}

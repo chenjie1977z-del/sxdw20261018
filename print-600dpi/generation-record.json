@@ -1,0 +1,92 @@
+[
+  {
+    "file": "sources/female-front.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/female-side.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/female-back.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/female-upper-detail.png",
+    "native_pixels": [
+      1790,
+      878
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/female-lower-detail.png",
+    "native_pixels": [
+      1536,
+      1024
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/male-front.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/male-side.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/male-back.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/male-upper-detail.png",
+    "native_pixels": [
+      1774,
+      887
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  },
+  {
+    "file": "sources/male-lower-detail.png",
+    "native_pixels": [
+      1536,
+      1024
+    ],
+    "method": "New reference-guided regional or single-view generation; no upsampling.",
+    "reference_git_commit": "1cb9ef5"
+  }
+]

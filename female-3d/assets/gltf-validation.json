@@ -2,24 +2,30 @@
   "uri": "asian-female.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-10-18T05:45:29.516Z",
+  "validatedAt": "2026-10-18T08:43:24.964Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
-    "numInfos": 2,
+    "numInfos": 3,
     "numHints": 0,
     "messages": [
       {
-        "code": "UNUSED_OBJECT",
-        "message": "This object may be unused.",
+        "code": "UNUSED_MESH_TANGENT",
+        "message": "Tangents are not used because the material has no normal texture.",
         "severity": 2,
-        "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        "pointer": "/meshes/2/primitives/0/attributes/TANGENT"
+      },
+      {
+        "code": "UNUSED_MESH_TANGENT",
+        "message": "Tangents are not used because the material has no normal texture.",
+        "severity": 2,
+        "pointer": "/meshes/3/primitives/0/attributes/TANGENT"
       },
       {
         "code": "UNUSED_OBJECT",
         "message": "This object may be unused.",
         "severity": 2,
-        "pointer": "/meshes/7/primitives/0/attributes/TEXCOORD_0"
+        "pointer": "/meshes/3/primitives/0/attributes/TEXCOORD_0"
       }
     ],
     "truncated": false
@@ -32,10 +38,36 @@
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 15694996
+        "byteLength": 39715908
       },
       {
         "pointer": "/images/0",
+        "mimeType": "image/png",
+        "storage": "buffer-view",
+        "image": {
+          "width": 4096,
+          "height": 4096,
+          "format": "rgb",
+          "primaries": "srgb",
+          "transfer": "srgb",
+          "bits": 8
+        }
+      },
+      {
+        "pointer": "/images/1",
+        "mimeType": "image/png",
+        "storage": "buffer-view",
+        "image": {
+          "width": 4096,
+          "height": 4096,
+          "format": "rgb",
+          "primaries": "srgb",
+          "transfer": "srgb",
+          "bits": 8
+        }
+      },
+      {
+        "pointer": "/images/2",
         "mimeType": "image/png",
         "storage": "buffer-view",
         "image": {
@@ -49,16 +81,16 @@
       }
     ],
     "animationCount": 0,
-    "materialCount": 4,
+    "materialCount": 3,
     "hasMorphTargets": false,
     "hasSkins": false,
     "hasTextures": true,
     "hasDefaultScene": true,
-    "drawCallCount": 8,
-    "totalVertexCount": 303535,
-    "totalTriangleCount": 535032,
+    "drawCallCount": 4,
+    "totalVertexCount": 278036,
+    "totalTriangleCount": 457624,
     "maxUVs": 1,
     "maxInfluences": 0,
-    "maxAttributes": 3
+    "maxAttributes": 4
   }
 }

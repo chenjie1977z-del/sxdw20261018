@@ -1,4 +1,5 @@
 {
+  "revision": 3,
   "body_height_m": 1.65,
   "height_is_synthetic": true,
   "base_vertices": 13380,
@@ -17,13 +18,44 @@
       "weight": 1.0
     },
     {
-      "file": "torso/torso-muscle-dorsi-incr.target",
+      "file": "macrodetails/universal-female-young-averagemuscle-maxweight.target",
+      "weight": 0.18
+    },
+    {
+      "file": "breast/nipple-point-decr.target",
+      "weight": 0.7
+    },
+    {
+      "file": "breast/nipple-size-decr.target",
+      "weight": 0.65
+    },
+    {
+      "file": "armslegs/l-upperarm-shoulder-muscle-incr.target",
       "weight": 0.1
     },
     {
-      "file": "stomach/stomach-tone-incr.target",
+      "file": "armslegs/r-upperarm-shoulder-muscle-incr.target",
       "weight": 0.1
+    },
+    {
+      "file": "torso/torso-muscle-dorsi-incr.target",
+      "weight": 0.14
+    },
+    {
+      "file": "stomach/stomach-tone-incr.target",
+      "weight": 0.08
     }
+  ],
+  "clothing_method": "Analytical garment coverage baked to 4K albedo on the exact body surface; no separate garment mesh.",
+  "garment_offset_m": 0,
+  "garment_thickness_m": 0,
+  "micro_normal_pixels": [
+    4096,
+    4096
+  ],
+  "albedo_pixels": [
+    4096,
+    4096
   ],
   "scope": "External surface only; mathematical topology checks, not professional anatomical validation."
 }

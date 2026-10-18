@@ -69,7 +69,13 @@ $('#perspective').onchange=e=>{
  camera.position.copy(p);setupControls();controls.target.copy(t);controls.autoRotate=$('#rotate').checked;controls.update();
 };
 function applyMode(mode){
- for(const m of materials){m.material.color.copy(mode==='clay'?new THREE.Color('#d9d3be'):m.color);m.material.map=mode==='clay'?null:m.map;m.material.roughness=mode==='clay'?.85:m.roughness;m.material.needsUpdate=true;}
+ for(const m of materials){
+  if(mode==='clay'&&m.map&&!m.clayMap&&m.material.name.includes('flush sportswear')){
+   const image=m.map.image,canvas=document.createElement('canvas');canvas.width=Math.min(image.width,2048);canvas.height=Math.round(image.height*canvas.width/image.width);
+   const c=canvas.getContext('2d');c.filter='grayscale(1) brightness(1.25)';c.drawImage(image,0,0,canvas.width,canvas.height);m.clayMap=m.map.clone();m.clayMap.image=canvas;m.clayMap.needsUpdate=true;
+  }
+  m.material.color.copy(mode==='clay'?new THREE.Color('#d9d3be'):m.color);m.material.map=mode==='clay'?(m.clayMap||null):m.map;m.material.normalMap=mode==='clay'?null:m.normalMap;m.material.roughness=mode==='clay'?.85:m.roughness;m.material.needsUpdate=true;
+ }
  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
 }
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>applyMode(b.dataset.mode));
@@ -118,7 +124,7 @@ try{
  const binary=atob(window.__MODEL_BASE64__);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);delete window.__MODEL_BASE64__;
  new GLTFLoader().parse(bytes.buffer,'',gltf=>{
   model=gltf.scene;scene.add(model);let triangles=0;
-  model.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.name==='Female_Surface')body=o;triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;for(const m of Array.isArray(o.material)?o.material:[o.material]){if(!materials.some(x=>x.material===m))materials.push({material:m,color:m.color.clone(),map:m.map,roughness:m.roughness});}}});
+  model.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.name==='Female_Surface')body=o;triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;for(const m of Array.isArray(o.material)?o.material:[o.material]){if(!materials.some(x=>x.material===m))materials.push({material:m,color:m.color.clone(),map:m.map,normalMap:m.normalMap,roughness:m.roughness});}}});
   $('#loading').style.display='none';$('#status').textContent=`${Math.round(triangles/1000)}k 三角面 · 合成身高 165 cm`;setView('front');
   teaching=createTeachingTools({capture:captureSnapshot,message,getViewName:()=>$('#view-name').textContent,
    getView:()=>({projection:camera===ortho?'orthographic':'perspective',position:camera.position.toArray(),target:controls.target.toArray(),zoom:camera.zoom}),

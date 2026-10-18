@@ -5,6 +5,7 @@ Reads CC0 MakeHuman data, not MakeHuman application code. Blender 4.3+.
 from pathlib import Path
 import json, math
 import bpy
+import numpy as np
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,8 +31,13 @@ def obj_data(path):
 verts, uv, faces, fuv, groups = obj_data(DATA / '3dobjs/base.obj')
 targets = [('macrodetails/asian-female-young.target', 1.0),
            ('macrodetails/universal-female-young-averagemuscle-averageweight.target', 1.0),
-           ('torso/torso-muscle-dorsi-incr.target', 0.10),
-           ('stomach/stomach-tone-incr.target', 0.10)]
+           ('macrodetails/universal-female-young-averagemuscle-maxweight.target', 0.18),
+           ('breast/nipple-point-decr.target', 0.70),
+           ('breast/nipple-size-decr.target', 0.65),
+           ('armslegs/l-upperarm-shoulder-muscle-incr.target', 0.10),
+           ('armslegs/r-upperarm-shoulder-muscle-incr.target', 0.10),
+           ('torso/torso-muscle-dorsi-incr.target', 0.14),
+           ('stomach/stomach-tone-incr.target', 0.08)]
 for name, weight in targets:
     for line in (DATA / 'targets' / name).read_text().splitlines():
         a = line.split()
@@ -54,7 +60,8 @@ def material(name, color, rough=.6):
         bsdf.inputs['Subsurface Weight'].default_value=.09
     return m
 
-skin=material('Skin',(.58,.345,.22),.60)
+skin=material('Skin and flush sportswear',(1,1,1),.62)
+skin.node_tree.nodes.get('Principled BSDF').inputs['Subsurface Weight'].default_value=.07
 cloth=material('Clinical sportswear',(.105,.135,.155),.9)
 hair=material('Black hair',(.018,.013,.010),.47)
 lip=material('Natural lips',(.40,.19,.145),.65)
@@ -75,15 +82,105 @@ body=make_mesh('Female_Surface', [convert(verts[j]) for j in body_indices],
                [[mapping[j] for j in faces[i]] for i in body_faces],uv,[fuv[i] for i in body_faces],skin)
 body['description']='Adult female with MakeHuman Asian appearance target. Synthetic 1.65 m body, not a scan or medical measurement.'
 
-# Garments follow the real body topology and remain opaque. There is no undress control.
-bra_ids=[];short_ids=[];hair_ids=[]
+# Preserve an editable low-poly source, but export only its refined render mesh.
+source_body=body;source_body.name='SOURCE_LowPoly_Female'
+sub=source_body.modifiers.new('Surface refinement','SUBSURF');sub.levels=2;sub.render_levels=2
+deps=bpy.context.evaluated_depsgraph_get()
+render_mesh=bpy.data.meshes.new_from_object(source_body.evaluated_get(deps),preserve_all_data_layers=True,depsgraph=deps)
+body=bpy.data.objects.new('Female_Surface',render_mesh);bpy.context.collection.objects.link(body)
+body['clothing']='Opaque vertex-color sportswear on the exact same surface: zero extra clothing thickness or displacement.'
+source_body.hide_render=True;source_body.hide_set(True)
+
+# Clothing is a smooth material boundary on the body, not offset geometry.
+# This guarantees zero floating hems, zero fabric thickness and no simulated folds.
+positions=np.empty((len(render_mesh.vertices),3),dtype=np.float32)
+render_mesh.vertices.foreach_get('co',positions.reshape(-1))
+x=positions[:,0]/scale;y=positions[:,2]/scale+low;z=-positions[:,1]/scale
+def smooth01(v):
+    t=np.clip(v,0,1);return t*t*(3-2*t)
+def band(v,lo,hi,edge=.03):return smooth01((v-lo)/edge)*smooth01((hi-v)/edge)
+front=smooth01((z+.04)/.12)
+torso=smooth01((1.56-np.abs(x))/.05)
+neckline=3.52-.48*np.exp(-np.power(x/.76,4))
+bra_front=smooth01((y-1.68)/.03)*smooth01((neckline-y)/.03)*front
+bra_back=band(y,1.68,2.12)*(1-front)
+straps=band(np.abs(x),.73,.98)*band(y,1.98,4.60)
+bra_mask=np.maximum(bra_front+bra_back,straps)*torso
+short_mask=band(y,-2.40,.14)*smooth01((2.20-np.abs(x))/.04)
+clothing=np.maximum(bra_mask,short_mask)
+skin_rgb=np.array([.58,.345,.22],dtype=np.float32)
+cloth_rgb=np.array([.105,.135,.155],dtype=np.float32)
+rgba=np.ones((len(positions),4),dtype=np.float32)
+rgba[:,:3]=skin_rgb[None,:]*(1-clothing[:,None])+cloth_rgb[None,:]*clothing[:,None]
+color=render_mesh.color_attributes.new(name='SurfaceColor',type='FLOAT_COLOR',domain='POINT')
+color.data.foreach_set('color',rgba.reshape(-1))
+attr=skin.node_tree.nodes.new('ShaderNodeVertexColor');attr.layer_name='SurfaceColor'
+# Bake the analytical coverage at texel positions, avoiding vertex-interpolation
+# stair steps along hems. Point colors remain only as editable diagnostic data.
+nodes=skin.node_tree.nodes;links=skin.node_tree.links
+def value_node(operation,a,b=None):
+    node=nodes.new('ShaderNodeMath');node.operation=operation
+    for socket,v in zip(node.inputs,[a,b]):
+        if v is None:continue
+        if isinstance(v,(int,float)):socket.default_value=v
+        else:links.new(v,socket)
+    return node.outputs[0]
+def node_smooth(v):
+    t=value_node('MINIMUM',1,value_node('MAXIMUM',0,v))
+    return value_node('MULTIPLY',value_node('MULTIPLY',t,t),value_node('SUBTRACT',3,value_node('MULTIPLY',2,t)))
+def node_band(v,lo,hi,edge=.03):
+    return value_node('MULTIPLY',node_smooth(value_node('DIVIDE',value_node('SUBTRACT',v,lo),edge)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',hi,v),edge)))
+geometry=nodes.new('ShaderNodeNewGeometry');separate=nodes.new('ShaderNodeSeparateXYZ');links.new(geometry.outputs['Position'],separate.inputs[0])
+px=value_node('DIVIDE',separate.outputs['X'],scale)
+py=value_node('ADD',value_node('DIVIDE',separate.outputs['Z'],scale),low)
+pz=value_node('DIVIDE',separate.outputs['Y'],-scale)
+absx=value_node('ABSOLUTE',px)
+f=node_smooth(value_node('DIVIDE',value_node('ADD',pz,.04),.12))
+torso_node=node_smooth(value_node('DIVIDE',value_node('SUBTRACT',1.56,absx),.05))
+exponent=value_node('MULTIPLY',-1,value_node('POWER',value_node('DIVIDE',px,.76),4))
+neckline_node=value_node('SUBTRACT',3.52,value_node('MULTIPLY',.48,value_node('POWER',math.e,exponent)))
+front_node=value_node('MULTIPLY',value_node('MULTIPLY',node_smooth(value_node('DIVIDE',value_node('SUBTRACT',py,1.68),.03)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',neckline_node,py),.03))),f)
+back_node=value_node('MULTIPLY',node_band(py,1.68,2.12),value_node('SUBTRACT',1,f))
+strap_node=value_node('MULTIPLY',node_band(absx,.73,.98),node_band(py,1.98,4.60))
+bra_node=value_node('MULTIPLY',value_node('MAXIMUM',value_node('ADD',front_node,back_node),strap_node),torso_node)
+short_node=value_node('MULTIPLY',node_band(py,-2.4,.14),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',2.20,absx),.04)))
+mask_node=value_node('MAXIMUM',bra_node,short_node)
+mix=nodes.new('ShaderNodeMixRGB');mix.blend_type='MIX';links.new(mask_node,mix.inputs[0]);mix.inputs[1].default_value=(*skin_rgb,1);mix.inputs[2].default_value=(*cloth_rgb,1)
+emission=nodes.new('ShaderNodeEmission');links.new(mix.outputs[0],emission.inputs['Color'])
+output=nodes.get('Material Output');links.new(emission.outputs[0],output.inputs['Surface'])
+albedo=bpy.data.images.new('Seamless sportswear color 4K',width=4096,height=4096,alpha=False)
+bake_node=nodes.new('ShaderNodeTexImage');bake_node.image=albedo;nodes.active=bake_node
+bpy.ops.object.select_all(action='DESELECT');body.select_set(True);bpy.context.view_layer.objects.active=body
+bpy.context.scene.render.engine='CYCLES';bpy.context.scene.cycles.samples=1;bpy.context.scene.render.bake.margin=12
+bpy.ops.object.bake(type='EMIT')
+albedo.filepath_raw=str(ROOT/'assets/skin-sportswear-albedo-4k.png');albedo.file_format='PNG';albedo.save();albedo.pack()
+links.new(bake_node.outputs['Color'],nodes.get('Principled BSDF').inputs['Base Color'])
+links.new(nodes.get('Principled BSDF').outputs[0],output.inputs['Surface'])
+
+# Original 4K procedural tangent normal texture. Microtexture only, not anatomy.
+resolution=4096
+rng=np.random.default_rng(20261018)
+noise=rng.standard_normal((resolution,resolution),dtype=np.float32)
+height=(noise+np.roll(noise,1,0)+np.roll(noise,-1,0)+np.roll(noise,1,1)+np.roll(noise,-1,1))/5
+nx=(np.roll(height,1,1)-np.roll(height,-1,1))*.027
+ny=(np.roll(height,1,0)-np.roll(height,-1,0))*.027
+normal_pixels=np.ones((resolution,resolution,4),dtype=np.float32)
+normal_pixels[:,:,0]=nx*.5+.5;normal_pixels[:,:,1]=ny*.5+.5
+normal_pixels[:,:,2]=np.sqrt(np.clip(1-nx*nx-ny*ny,0,1))*.5+.5
+normal_image=bpy.data.images.new('Original skin micro-normal 4K',width=resolution,height=resolution,alpha=False)
+normal_image.colorspace_settings.name='Non-Color';normal_image.pixels.foreach_set(normal_pixels.reshape(-1))
+normal_image.filepath_raw=str(ROOT/'assets/skin-micro-normal-4k.png');normal_image.file_format='PNG';normal_image.save();normal_image.pack()
+texture=skin.node_tree.nodes.new('ShaderNodeTexImage');texture.image=normal_image
+normal_node=skin.node_tree.nodes.new('ShaderNodeNormalMap');normal_node.inputs['Strength'].default_value=.35
+skin.node_tree.links.new(texture.outputs['Color'],normal_node.inputs['Color'])
+skin.node_tree.links.new(normal_node.outputs['Normal'],skin.node_tree.nodes.get('Principled BSDF').inputs['Normal'])
+del noise,height,nx,ny,normal_pixels,positions,rgba
+
+# Hair is still a separate close-fitting shell; garments are not.
+hair_ids=[]
 for i in body_faces:
     center=sum((verts[j] for j in faces[i]),Vector())/len(faces[i])
     x,y,z=center
-    torso=abs(x)<1.50
-    if torso and ((1.68<y<3.20 and z>0.05) or (1.68<y<2.14)):
-        bra_ids.append(i)
-    if -2.40<y<.12 and abs(x)<2.12: short_ids.append(i)
     if y>6.12 or (y>5.75 and z<.47) or (y>5.35 and z<-.04): hair_ids.append(i)
 
 def shell(name, ids, mat, offset):
@@ -108,31 +205,7 @@ def shell(name, ids, mat, offset):
     solid=ob.modifiers.new('Garment thickness','SOLIDIFY');solid.thickness=.0015;solid.offset=1
     return ob
 
-bra=shell('Sports_Bra',bra_ids,cloth,.006)
-shorts=shell('Mid_Thigh_Shorts',short_ids,cloth,.006)
 cap=shell('Hair_Cap',hair_ids,hair,.002)
-sub=body.modifiers.new('Surface refinement','SUBSURF');sub.levels=2;sub.render_levels=2
-
-# Separate smooth ribbons avoid stair-step straps inherited from face selection.
-for side in [-1,1]:
-    anchors=[Vector((side*.86,2.55,1.12)),Vector((side*.86,3.35,.9)),Vector((side*.86,4.02,.25)),Vector((side*.86,3.65,-.5)),Vector((side*.86,2.75,-.65)),Vector((side*.86,1.97,-.55))]
-    path=[]
-    for k in range(len(anchors)-1):
-        p0=anchors[max(k-1,0)];p1=anchors[k];p2=anchors[k+1];p3=anchors[min(k+2,len(anchors)-1)]
-        for step in range(16):
-            t=step/16
-            path.append((2*p1+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t*t+(-p0+3*p1-3*p2+p3)*t*t*t)*.5)
-    path.append(anchors[-1])
-    ribbon=[]
-    for p in path:
-        for j in range(5):ribbon.append(convert(p+Vector(((j-2)*.055,0,0))))
-    rf=[]
-    for i in range(len(path)-1):
-        for j in range(4):rf.append([i*5+j,i*5+j+1,(i+1)*5+j+1,(i+1)*5+j])
-    strap=make_mesh('Bra_Strap_'+str(side),ribbon,rf,mat=cloth)
-    ss=strap.modifiers.new('Smooth ribbon','SUBSURF');ss.levels=1;ss.render_levels=1
-    wrap=strap.modifiers.new('Follow shoulder','SHRINKWRAP');wrap.target=body;wrap.wrap_method='NEAREST_SURFACEPOINT';wrap.wrap_mode='ABOVE_SURFACE';wrap.offset=.009
-    solid=strap.modifiers.new('Ribbon thickness','SOLIDIFY');solid.thickness=.0015;solid.offset=1
 
 # Fit the bundled CC0 eye asset through its barycentric proxy attachment data.
 ev, et, ef, eu, eg=obj_data(DATA/'eyes/high-poly/high-poly.obj')
@@ -172,21 +245,26 @@ scene=bpy.context.scene
 scene.unit_settings.system='METRIC'
 scene['status']='Surface concept. No internal bones, no clinical calibration, no professional anatomical approval.'
 scene['asset_source']='MakeHuman CC0 assets at a8bc2d54ff0ac92e78ff71431b1023eda42bf482'
-bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/asian-female.blend'))
-bpy.ops.export_scene.gltf(filepath=str(ROOT/'assets/asian-female.glb'),export_format='GLB',export_apply=True,export_cameras=False,export_lights=False,export_extras=True)
+bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/asian-female.blend'),compress=True)
+bpy.ops.object.select_all(action='DESELECT')
+for ob in scene.objects:
+    if ob.type=='MESH' and ob!=source_body:ob.select_set(True)
+bpy.ops.export_scene.gltf(filepath=str(ROOT/'assets/asian-female.glb'),export_format='GLB',use_selection=True,export_apply=True,export_vertex_color='NONE',export_tangents=True,export_cameras=False,export_lights=False,export_extras=True)
 
 # Inspect the evaluated body rather than claiming subdivision created new anatomical information.
 deps=bpy.context.evaluated_depsgraph_get();evaluated=body.evaluated_get(deps);mesh=evaluated.to_mesh()
 mesh.calc_loop_triangles()
 edge_counts={}
-for poly in body.data.polygons:
+for poly in source_body.data.polygons:
     ids=list(poly.vertices)
     for a,b in zip(ids,ids[1:]+ids[:1]):
         key=tuple(sorted([a,b]));edge_counts[key]=edge_counts.get(key,0)+1
-report={'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(body.data.vertices),'base_faces':len(body.data.polygons),
+report={'revision':3,'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
         'evaluated_body_vertices':len(mesh.vertices),'evaluated_body_triangles':len(mesh.loop_triangles),
         'boundary_edges':sum(v==1 for v in edge_counts.values()),'nonmanifold_edges':sum(v>2 for v in edge_counts.values()),
         'targets':[{'file':n,'weight':w} for n,w in targets],
+        'clothing_method':'Analytical garment coverage baked to 4K albedo on the exact body surface; no separate garment mesh.',
+        'garment_offset_m':0,'garment_thickness_m':0,'micro_normal_pixels':[4096,4096],'albedo_pixels':[4096,4096],
         'scope':'External surface only; mathematical topology checks, not professional anatomical validation.'}
 (ROOT/'assets/model-report.json').write_text(json.dumps(report,indent=2)+'\n')
 print('MODEL_REPORT',json.dumps(report))
