@@ -1,0 +1,92 @@
+{
+  "page_mm": [
+    420,
+    297
+  ],
+  "files": [
+    {
+      "file": "male-A3-300dpi.png",
+      "pixels": [
+        4961,
+        3508
+      ],
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "mode": "RGB",
+      "icc": true,
+      "bytes": 8420343
+    },
+    {
+      "file": "male-A3-300dpi.tif",
+      "pixels": [
+        4961,
+        3508
+      ],
+      "dpi": [
+        299.999401550293,
+        299.999401550293
+      ],
+      "mode": "RGB",
+      "icc": true,
+      "bytes": 9656370
+    },
+    {
+      "file": "female-A3-300dpi.png",
+      "pixels": [
+        4961,
+        3508
+      ],
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "mode": "RGB",
+      "icc": true,
+      "bytes": 7376443
+    },
+    {
+      "file": "female-A3-300dpi.tif",
+      "pixels": [
+        4961,
+        3508
+      ],
+      "dpi": [
+        299.999401550293,
+        299.999401550293
+      ],
+      "mode": "RGB",
+      "icc": true,
+      "bytes": 8919408
+    },
+    {
+      "file": "skeleton-A3-300dpi.png",
+      "pixels": [
+        4961,
+        3508
+      ],
+      "dpi": [
+        299.9994,
+        299.9994
+      ],
+      "mode": "RGB",
+      "icc": true,
+      "bytes": 10298961
+    },
+    {
+      "file": "skeleton-A3-300dpi.tif",
+      "pixels": [
+        4961,
+        3508
+      ],
+      "dpi": [
+        299.999401550293,
+        299.999401550293
+      ],
+      "mode": "RGB",
+      "icc": true,
+      "bytes": 13313894
+    }
+  ]
+}
