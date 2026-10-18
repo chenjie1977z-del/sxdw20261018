@@ -127,6 +127,56 @@
       "path": "assets/source/targets/stomach/stomach-navel-in.target",
       "sha256": "ed81ff7be117fbb1049152a465f22ee04dd1137bf5d23d75b78591e7c989a6dd",
       "source_path": "makehuman/data/targets/stomach/stomach-navel-in.target"
+    },
+    {
+      "path": "assets/source/targets/mouth/mouth-scale-horiz-incr.target",
+      "sha256": "ccfc39cca249883ebc46af6f2c96c4130df13a67ebce30a2550af17a48637770",
+      "source_path": "makehuman/data/targets/mouth/mouth-scale-horiz-incr.target"
+    },
+    {
+      "path": "assets/source/targets/mouth/mouth-lowerlip-volume-incr.target",
+      "sha256": "dbdaf045b00c67bf8672d53bc8cf94eb3e3dea316de6fe18a278f7080564c65d",
+      "source_path": "makehuman/data/targets/mouth/mouth-lowerlip-volume-incr.target"
+    },
+    {
+      "path": "assets/source/targets/nose/nose-nostrils-width-decr.target",
+      "sha256": "381335aed6091e8b394092dabea983b89bc2e35f548ced6b5ab2eca6dabc8bd2",
+      "source_path": "makehuman/data/targets/nose/nose-nostrils-width-decr.target"
+    },
+    {
+      "path": "assets/source/targets/nose/nose-scale-depth-incr.target",
+      "sha256": "6bb03c3065e048d6e9abbcfa58961bfbe1753a307be0d3de477cac6aeaf5f750",
+      "source_path": "makehuman/data/targets/nose/nose-scale-depth-incr.target"
+    },
+    {
+      "path": "assets/source/targets/eyes/l-eye-height2-incr.target",
+      "sha256": "8521b63c1bf07af06194e96e14eb522dce43615ef1139b8117f104f5132fbc69",
+      "source_path": "makehuman/data/targets/eyes/l-eye-height2-incr.target"
+    },
+    {
+      "path": "assets/source/targets/eyes/l-eye-corner2-up.target",
+      "sha256": "e31bbedfb1d451459a6ebf510a055e4af94eb8f146079fe9a5e7722b0e4aa661",
+      "source_path": "makehuman/data/targets/eyes/l-eye-corner2-up.target"
+    },
+    {
+      "path": "assets/source/targets/eyes/l-eye-eyefold-up.target",
+      "sha256": "489f12ab9ea1b528c0707dc656c863002a21bff2017880ed78407819ce6a12f3",
+      "source_path": "makehuman/data/targets/eyes/l-eye-eyefold-up.target"
+    },
+    {
+      "path": "assets/source/targets/eyes/r-eye-height2-incr.target",
+      "sha256": "35e1f070ab8a77dc103aab81c478f04136f6afec378a7003d8834e49ff02d916",
+      "source_path": "makehuman/data/targets/eyes/r-eye-height2-incr.target"
+    },
+    {
+      "path": "assets/source/targets/eyes/r-eye-corner2-up.target",
+      "sha256": "121342afb92d0916ca1fba59df1c45a61dcf08713fd81f6ff67871cfc6a4f14c",
+      "source_path": "makehuman/data/targets/eyes/r-eye-corner2-up.target"
+    },
+    {
+      "path": "assets/source/targets/eyes/r-eye-eyefold-up.target",
+      "sha256": "bc5fac33b9ab5ee66c34c5a8d9449b9d561f2015155c34b5425c02ca9326ddca",
+      "source_path": "makehuman/data/targets/eyes/r-eye-eyefold-up.target"
     }
   ]
 }

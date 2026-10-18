@@ -6,7 +6,7 @@
 
 已提供亚洲成年女性体表的真实三维网格与离线查看器，可旋转、缩放、平移、切换标准视角、聚焦肩背、查看线框、测量两点直线距离，并导出 4K PNG。
 
-**优化版 05**：新增随旋转保留的三维表面标注，支持可拖动的文字、端点与描线、可调弧度的两点连线、等分刻度、大小调整、撤销重做及三维课件保存恢复。背景可切换暖白与两档暗灰；模型取消刘海和马尾，调整轻微微笑与体表浅纹。[使用说明与功能边界](female-3d/三维标注与优化版05.md)。
+**优化版 06**：增加点、直线、圆、三角形和长方形等三维标注工具；支持视图与标注右键菜单、重命名和删除。文字框可用角部手柄缩放，宽、高、字号可分别修改，指针线更细。头像参考本次附件调整中分发型、脸型、眉眼与微笑，支持导入 05 版三维课件。[使用说明与功能边界](female-3d/图形工具与优化版06.md)。
 
 同时保留**二维截图板书**：画笔、荧光笔、箭头、形状、文字、移动、擦除、撤销重做、多页课件，以及可编辑 `.excalidraw` 导出。这套二维笔迹绑定视角快照；三维锚定标注请使用查看器上方的新工具，两类课件分别保存。
 
@@ -21,9 +21,9 @@
 - [正面预览](female-3d/previews/viewer-front.png) · [背面预览](female-3d/previews/viewer-back.png) · [肩背局部](female-3d/previews/viewer-shoulder.png)
 - [来源与许可](female-3d/THIRD_PARTY_NOTICES.md) · [验证范围](female-3d/VALIDATION.md)
 
-[![三维表面锚定标注与暗色背景预览](female-3d/previews/v5-anchors-slate.png)](female-3d/三维标注与优化版05.md)
+[![三维表面锚定标注与暗色背景预览](female-3d/previews/v6-shape-tools.png)](female-3d/图形工具与优化版06.md)
 
-[![女性 3D 面容与发际线预览](female-3d/previews/v5-face.png)](female-3d/previews/v5-face.png)
+[![女性 3D 面容与发际线预览](female-3d/previews/v6-face.png)](female-3d/previews/v6-face.png)
 
 本版是体表概念样稿，不含内部骨骼，尚未经专业解剖校核；体表细分网格的平滑度不等于医学细节准确性。
 

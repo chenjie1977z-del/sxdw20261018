@@ -1,5 +1,5 @@
 {
-  "revision": 5,
+  "revision": 6,
   "adult_age_range_years": [
     20,
     25
@@ -47,27 +47,67 @@
     },
     {
       "file": "chin/chin-jaw-drop-decr.target",
-      "weight": 0.48
+      "weight": 0.26
     },
     {
       "file": "head/head-oval.target",
-      "weight": 0.18
+      "weight": 0.35
     },
     {
       "file": "nose/nose-width3-decr.target",
-      "weight": 0.1
+      "weight": 0.23
     },
     {
       "file": "mouth/mouth-angles-up.target",
-      "weight": 0.16
+      "weight": 0.45
     },
     {
       "file": "mouth/mouth-upperlip-height-incr.target",
-      "weight": 0.22
+      "weight": 0.34
     },
     {
       "file": "mouth/mouth-upperlip-volume-incr.target",
-      "weight": 0.22
+      "weight": 0.28
+    },
+    {
+      "file": "mouth/mouth-scale-horiz-incr.target",
+      "weight": 0.18
+    },
+    {
+      "file": "mouth/mouth-lowerlip-volume-incr.target",
+      "weight": 0.12
+    },
+    {
+      "file": "nose/nose-nostrils-width-decr.target",
+      "weight": 0.18
+    },
+    {
+      "file": "nose/nose-scale-depth-incr.target",
+      "weight": 0.12
+    },
+    {
+      "file": "eyes/l-eye-height2-incr.target",
+      "weight": 0.25
+    },
+    {
+      "file": "eyes/l-eye-corner2-up.target",
+      "weight": 0.12
+    },
+    {
+      "file": "eyes/l-eye-eyefold-up.target",
+      "weight": 0.12
+    },
+    {
+      "file": "eyes/r-eye-height2-incr.target",
+      "weight": 0.25
+    },
+    {
+      "file": "eyes/r-eye-corner2-up.target",
+      "weight": 0.12
+    },
+    {
+      "file": "eyes/r-eye-eyefold-up.target",
+      "weight": 0.12
     },
     {
       "file": "stomach/stomach-navel-in.target",
@@ -114,19 +154,20 @@
       "palmar wrist creases",
       "anterior axillary fold"
     ],
-    "max_absolute_displacement_m": 0.0038730299565941095,
+    "max_absolute_displacement_m": 0.003450286341831088,
     "professionally_validated": false
   },
   "face_and_hair": {
-    "hairstyle": "Close-fitting swept short hair, curved frontal and nuchal hairlines; no bangs or ponytail",
-    "eyebrows": "420 fine body-fitted tapered hairs over a soft baked brow tint",
+    "hairstyle": "Center-parted swept-back close-fitting hair; curved frontal and nuchal hairlines; no bangs or ponytail",
+    "eyebrows": "600 fine body-fitted tapered hairs over a soft baked brow tint",
     "eyelashes": {
       "upper": 54,
       "lower": 28
     },
+    "smile": "Coral lip tint with a small original upper dental arch visible through the neutral lip opening",
     "attachment": "Ray cast to refined adult body surface",
     "age": "adult, 20\u201325 years",
-    "not_a_real_person": true
+    "reference": "User supplied frontal portrait: oval face, defined brows, almond eyes, coral smile and center-parted dark hair; interpretive 3D approximation, not an identity reconstruction"
   },
   "clothing_method": "Analytical garment coverage baked to 4K albedo on the exact body surface; no separate garment mesh.",
   "garment_offset_m": 0,
@@ -155,11 +196,19 @@
     },
     {
       "name": "Hair_Fine_Strokes",
-      "triangles": 8840
+      "triangles": 53976
+    },
+    {
+      "name": "Natural_Center_Part",
+      "triangles": 136
+    },
+    {
+      "name": "Upper_Teeth",
+      "triangles": 1128
     },
     {
       "name": "Eyebrows",
-      "triangles": 19320
+      "triangles": 27600
     },
     {
       "name": "Upper_Eyelashes",
@@ -170,5 +219,5 @@
       "triangles": 1008
     }
   ],
-  "total_rendered_triangles": 475158
+  "total_rendered_triangles": 529838
 }

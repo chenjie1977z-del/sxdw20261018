@@ -33,3 +33,7 @@ Original viewer code, build scripts, garment construction, hair additions and pr
 Same-source CC0 upper-lip and umbilicus morphs were added; hashes and exact source paths are in the provenance manifest. Procedural shallow body folds, revised hairline and the surface-annotation tools are original MIT-licensed project additions.
 
 three-mesh-bvh 0.9.2 is bundled for local surface picking and projection. Copyright © Garrett Johnson and contributors, MIT. Full license: `licenses/THREE-MESH-BVH-MIT.txt`. No network service is required at runtime.
+
+## Revision 06 additions
+
+Same-source CC0 eye-opening, eyelid, mouth-width, lower-lip and nose targets are listed with preserved hashes in the provenance manifest. Center-parted scalp detailing, an original small upper dental arch, reference-directed face adjustments, shape tools, context menus and text-box resizing are original project additions. The user-supplied reference portrait is not redistributed or used as a photographic texture; its own rights are not included in the project's asset licenses.

@@ -40,12 +40,22 @@ targets = [('macrodetails/asian-female-young.target', 1.0),
            ('breast/female-young-averagemuscle-averageweight-maxcup-averagefirmness.target', 0.32),
            ('chin/chin-width-decr.target', 0.18),
            ('chin/chin-bones-decr.target', 0.12),
-           ('chin/chin-jaw-drop-decr.target', 0.48),
-           ('head/head-oval.target', 0.18),
-           ('nose/nose-width3-decr.target', 0.10),
-           ('mouth/mouth-angles-up.target', 0.16),
-           ('mouth/mouth-upperlip-height-incr.target', 0.22),
-           ('mouth/mouth-upperlip-volume-incr.target', 0.22),
+           ('chin/chin-jaw-drop-decr.target', 0.26),
+           ('head/head-oval.target', 0.35),
+           ('nose/nose-width3-decr.target', 0.23),
+           ('mouth/mouth-angles-up.target', 0.45),
+           ('mouth/mouth-upperlip-height-incr.target', 0.34),
+           ('mouth/mouth-upperlip-volume-incr.target', 0.28),
+           ('mouth/mouth-scale-horiz-incr.target', 0.18),
+           ('mouth/mouth-lowerlip-volume-incr.target', 0.12),
+           ('nose/nose-nostrils-width-decr.target', 0.18),
+           ('nose/nose-scale-depth-incr.target', 0.12),
+           ('eyes/l-eye-height2-incr.target', 0.25),
+           ('eyes/l-eye-corner2-up.target', 0.12),
+           ('eyes/l-eye-eyefold-up.target', 0.12),
+           ('eyes/r-eye-height2-incr.target', 0.25),
+           ('eyes/r-eye-corner2-up.target', 0.12),
+           ('eyes/r-eye-eyefold-up.target', 0.12),
            ('stomach/stomach-navel-in.target', 0.30),
            ('armslegs/l-upperleg-muscle-incr.target', 0.26),
            ('armslegs/r-upperleg-muscle-incr.target', 0.26),
@@ -124,7 +134,7 @@ straps=band(np.abs(x),.73,.98)*band(y,1.98,4.60)
 bra_mask=np.maximum(bra_front+bra_back,straps)*torso
 short_mask=band(y,-2.40,.14)*smooth01((2.20-np.abs(x))/.04)
 clothing=np.maximum(bra_mask,short_mask)
-skin_rgb=np.array([.58,.345,.22],dtype=np.float32)
+skin_rgb=np.array([.61,.355,.25],dtype=np.float32)
 cloth_rgb=np.array([.105,.135,.155],dtype=np.float32)
 rgba=np.ones((len(positions),4),dtype=np.float32)
 rgba[:,:3]=skin_rgb[None,:]*(1-clothing[:,None])+cloth_rgb[None,:]*clothing[:,None]
@@ -163,14 +173,14 @@ short_node=value_node('MULTIPLY',node_band(py,-2.4,.14),node_smooth(value_node('
 mask_node=value_node('MAXIMUM',bra_node,short_node)
 mix=nodes.new('ShaderNodeMixRGB');mix.blend_type='MIX';links.new(mask_node,mix.inputs[0]);mix.inputs[1].default_value=(*skin_rgb,1);mix.inputs[2].default_value=(*cloth_rgb,1)
 # Soft natural lip tint, baked continuously rather than flat polygon patches.
-lip_curve=value_node('ADD',5.16,value_node('MULTIPLY',.25,value_node('POWER',px,2)))
+lip_curve=value_node('ADD',5.17,value_node('MULTIPLY',.85,value_node('POWER',px,2)))
 lip_y=value_node('SUBTRACT',py,lip_curve)
-lip_ellipse=value_node('ADD',value_node('POWER',value_node('DIVIDE',px,.255),2),value_node('POWER',value_node('DIVIDE',lip_y,.095),2))
+lip_ellipse=value_node('ADD',value_node('POWER',value_node('DIVIDE',px,.315),2),value_node('POWER',value_node('DIVIDE',lip_y,.110),2))
 lip_mask=value_node('MULTIPLY',node_smooth(value_node('DIVIDE',value_node('SUBTRACT',1,lip_ellipse),.35)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',pz,1.20),.06)))
-lip_mix=nodes.new('ShaderNodeMixRGB');links.new(lip_mask,lip_mix.inputs[0]);links.new(mix.outputs[0],lip_mix.inputs[1]);lip_mix.inputs[2].default_value=(.43,.205,.165,1)
+lip_mix=nodes.new('ShaderNodeMixRGB');links.new(lip_mask,lip_mix.inputs[0]);links.new(mix.outputs[0],lip_mix.inputs[1]);lip_mix.inputs[2].default_value=(.48,.095,.115,1)
 brow_t=value_node('DIVIDE',value_node('SUBTRACT',absx,.145),.36)
-brow_y=value_node('SUBTRACT',value_node('ADD',5.993,value_node('MULTIPLY',.067,value_node('SINE',value_node('MULTIPLY',math.pi,brow_t)))),value_node('MULTIPLY',.016,brow_t))
-brow_width=value_node('ADD',.009,value_node('MULTIPLY',.014,value_node('SUBTRACT',1,node_smooth(brow_t))))
+brow_y=value_node('SUBTRACT',value_node('ADD',5.945,value_node('MULTIPLY',.037,value_node('SINE',value_node('MULTIPLY',math.pi,brow_t)))),value_node('MULTIPLY',.016,brow_t))
+brow_width=value_node('ADD',.012,value_node('MULTIPLY',.022,value_node('SUBTRACT',1,node_smooth(brow_t))))
 brow_shape=node_smooth(value_node('DIVIDE',value_node('SUBTRACT',brow_width,value_node('ABSOLUTE',value_node('SUBTRACT',py,brow_y))),.012))
 brow_mask=value_node('MULTIPLY',value_node('MULTIPLY',brow_shape,node_band(absx,.145,.505,.025)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',pz,1.1),.08)))
 brow_mix=nodes.new('ShaderNodeMixRGB');links.new(value_node('MULTIPLY',.83,brow_mask),brow_mix.inputs[0]);links.new(lip_mix.outputs[0],brow_mix.inputs[1]);brow_mix.inputs[2].default_value=(.055,.031,.021,1)
@@ -295,7 +305,7 @@ for poly in source_body.data.polygons:
     ids=list(poly.vertices)
     for a,b in zip(ids,ids[1:]+ids[:1]):
         key=tuple(sorted([a,b]));edge_counts[key]=edge_counts.get(key,0)+1
-report={'revision':5,'adult_age_range_years':[20,25],'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
+report={'revision':6,'adult_age_range_years':[20,25],'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
         'evaluated_body_vertices':len(mesh.vertices),'evaluated_body_triangles':len(mesh.loop_triangles),
         'boundary_edges':sum(v==1 for v in edge_counts.values()),'nonmanifold_edges':sum(v>2 for v in edge_counts.values()),
         'targets':[{'file':n,'weight':w} for n,w in targets],

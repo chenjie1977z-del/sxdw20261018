@@ -59,7 +59,7 @@ def sculpt_surface(body, scale, low):
     positions[:,1]+=displacement
     # Relax the neutral open-mouth rest pose toward a narrow natural lip seam.
     lip_gate=g(x,.33)**4*np.exp(-((y-5.13)/.22)**4)*smooth((z-1.05)/.15)
-    lip_lift=(-.038*np.tanh((y-5.13)/.05)*lip_gate+.008*g(a-.21,.075)*g(y-5.17,.13)*smooth((z-1.10)/.15))*scale
+    lip_lift=(-.008*np.tanh((y-5.13)/.05)*lip_gate+.032*g(a-.26,.12)*g(y-5.17,.18)*smooth((z-1.10)/.15))*scale
     positions[:,2]+=lip_lift
     # Palmar wrist creases are shallow surface depressions, never dark ink lines.
     wrist_t=(a-3.92)*.57-(y-.93)*.69+(z-1.50)*.45
@@ -112,7 +112,7 @@ def add_face_and_hair(body, cap, hair, scale, low, make_mesh, material):
     for j in range(columns):
         angle=2*math.pi*j/columns
         c=math.cos(angle)
-        hairline_y=5.80+(.46 if c>=0 else .32)*c+.035*math.cos(2*angle)
+        hairline_y=5.80+(.46 if c>=0 else .32)*c+.035*math.cos(2*angle)-.035*math.exp(-(math.sin(angle)/.18)**2)*max(0,c)
         def scalp_at(phi):
             direction=Vector((math.sin(phi)*math.sin(angle),-math.sin(phi)*math.cos(angle),math.cos(phi)))
             hit,normal,_,_=bvh.ray_cast(origin,direction,1)
@@ -127,38 +127,66 @@ def add_face_and_hair(body, cap, hair, scale, low, make_mesh, material):
     for j in range(columns):
         for k in range(rows-1):
             a=j*rows+k;b=((j+1)%columns)*rows+k
+            # A narrow sagittal part reveals the underlying scalp instead of painted hair.
             scalp_f.append((a,b,b+1,a+1))
     scalp_f.append(tuple(j*rows for j in reversed(range(columns))))
     new_cap=make_mesh('Continuous scalp',scalp_v,scalp_f,mat=hair)
     import bpy
     bpy.data.objects.remove(cap,do_unlink=True);new_cap.name='Hair_Cap'
     hair.node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.64
-    # No fringe or ponytail. Short swept scalp strokes stay inside the hairline.
+    # Fine, swept-back strands share the scalp cap sampling; a center part stays visible.
     strokes=Strands()
-    for j,x in enumerate(np.linspace(-.48,.48,65)):
-        pts=[]
-        for t in np.linspace(0,1,14):
-            xx=x*(1-.25*t)
-            yy=6.35+.22*t
-            pts.append(skin_point(xx,yy,.0028))
-        strokes.add(pts,[.00012]*len(pts),5)
+    for j in range(columns):
+        if j in [0,79,80,159]:continue
+        # Long shallow sweeps give readable hair flow at face close-up, no fringe.
+        pts=[Vector(scalp_v[j*rows+k]) for k in range(3,rows)]
+        for p in pts:
+            direction=(p-origin).normalized();p+=direction*.00022
+        strokes.add(pts,[.000045+.000010*math.sin(j*2.4)]*len(pts),5)
     strokes.mesh('Hair_Fine_Strokes',make_mesh,hair)
-    brow_mat=material('Natural dark eyebrows',(.040,.027,.020),.86)
+    part_mat=material('Scalp at center part',(.43,.25,.17),.9)
+    part_points=[Vector(scalp_v[k]) for k in reversed(range(1,rows))]+[Vector(scalp_v[80*rows+k]) for k in range(1,rows-5)]
+    part_v=[]
+    for p in part_points:
+        p=p+(p-origin).normalized()*.00012
+        part_v.extend([tuple(p+Vector((-.00030,0,0))),tuple(p+Vector((.00030,0,0)))])
+    make_mesh('Natural_Center_Part',part_v,[(2*i,2*i+1,2*i+3,2*i+2) for i in range(len(part_points)-1)],mat=part_mat)
+    # Small upper dental arch, positioned inside the existing lip opening.
+    # These are original visual forms, not a dental anatomy or treatment model.
+    tooth_mat=material('Natural ivory teeth',(.74,.72,.65),.38)
+    teeth=[]
+    widths=[.045,.060,.075,.075,.060,.045];cursor=-sum(widths)/2
+    for i,w in enumerate(widths):
+        x=cursor+w/2;cursor+=w
+        y=5.166+.9*x*x;front=1.312-2.2*x*x;angle=math.atan(4.4*x)
+        import bpy
+        bpy.ops.mesh.primitive_cube_add(size=1,location=point(x-math.sin(angle)*.020,y,front-math.cos(angle)*.020))
+        ob=bpy.context.object;ob.name='Upper tooth';ob.rotation_euler.z=angle
+        ob.dimensions=((w-.003)*scale,.040*scale,.035*scale)
+        bpy.ops.object.transform_apply(location=False,rotation=True,scale=True)
+        ob.data.materials.append(tooth_mat);bevel=ob.modifiers.new('Rounded enamel edges','BEVEL');bevel.width=.00065;bevel.segments=3
+        bpy.ops.object.modifier_apply(modifier=bevel.name)
+        for poly in ob.data.polygons:poly.use_smooth=True
+        teeth.append(ob)
+    bpy.ops.object.select_all(action='DESELECT')
+    for ob in teeth:ob.select_set(True)
+    bpy.context.view_layer.objects.active=teeth[0];bpy.ops.object.join();teeth[0].name='Upper_Teeth'
+    brow_mat=material('Natural dark eyebrows',(.024,.016,.012),.86)
     lash_mat=material('Fine dark eyelashes',(.018,.012,.009),.70)
     brows=Strands();upper=Strands();lower=Strands()
     for side in [-1,1]:
         # Tapered eyebrow hairs follow the actual body surface through ray casts.
-        for j,t in enumerate(np.linspace(0,1,210)):
+        for j,t in enumerate(np.linspace(0,1,300)):
             x=.145+.36*t
-            y=5.993+.067*math.sin(math.pi*t)-.016*t
-            width=.030*(1-t)**.4+.004
+            y=5.945+.037*math.sin(math.pi*t)-.016*t
+            width=.046*(1-t)**.6+.005
             jitter=((j*37)%11/10-.5)*width
             pts=[skin_point(side*(x+.014*u),y+jitter+.014*u,.00030) for u in np.linspace(0,1,5)]
-            brows.add(pts,[.00008,.000075,.00006,.00004,.000015],5)
+            brows.add(pts,[.000065,.00006,.00005,.000035,.000012],5)
         # Upper lash line and individual modest-length eyelashes.
         def lid(t,upper=True):
             x=.155+.282*t
-            y=5.779+(.047 if upper else -.036)*math.sin(math.pi*t)+.008*t
+            y=5.779+(.058 if upper else -.043)*math.sin(math.pi*t)+.012*t
             return skin_point(side*x,y,.0009)
         line=[lid(t) for t in np.linspace(.02,.98,35)]
         upper.add(line,[.00035]*len(line),6)
@@ -173,7 +201,7 @@ def add_face_and_hair(body, cap, hair, scale, low, make_mesh, material):
     brows.mesh('Eyebrows',make_mesh,brow_mat)
     upper.mesh('Upper_Eyelashes',make_mesh,lash_mat)
     lower.mesh('Lower_Eyelashes',make_mesh,lash_mat)
-    return {'hairstyle':'Close-fitting swept short hair, curved frontal and nuchal hairlines; no bangs or ponytail',
-            'eyebrows':'420 fine body-fitted tapered hairs over a soft baked brow tint',
-            'eyelashes':{'upper':54,'lower':28},'attachment':'Ray cast to refined adult body surface',
-            'age':'adult, 20–25 years','not_a_real_person':True}
+    return {'hairstyle':'Center-parted swept-back close-fitting hair; curved frontal and nuchal hairlines; no bangs or ponytail',
+            'eyebrows':'600 fine body-fitted tapered hairs over a soft baked brow tint',
+            'eyelashes':{'upper':54,'lower':28},'smile':'Coral lip tint with a small original upper dental arch visible through the neutral lip opening','attachment':'Ray cast to refined adult body surface',
+            'age':'adult, 20–25 years','reference':'User supplied frontal portrait: oval face, defined brows, almond eyes, coral smile and center-parted dark hair; interpretive 3D approximation, not an identity reconstruction'}

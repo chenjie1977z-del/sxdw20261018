@@ -2,11 +2,11 @@
   "uri": "asian-female.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-10-18T14:08:12.076Z",
+  "validatedAt": "2026-10-18T16:10:26.553Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
-    "numInfos": 2,
+    "numInfos": 4,
     "numHints": 0,
     "messages": [
       {
@@ -20,6 +20,18 @@
         "message": "Tangents are not used because the material has no normal texture.",
         "severity": 2,
         "pointer": "/meshes/1/primitives/1/attributes/TANGENT"
+      },
+      {
+        "code": "UNUSED_MESH_TANGENT",
+        "message": "Tangents are not used because the material has no normal texture.",
+        "severity": 2,
+        "pointer": "/meshes/5/primitives/0/attributes/TANGENT"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "message": "This object may be unused.",
+        "severity": 2,
+        "pointer": "/meshes/5/primitives/0/attributes/TEXCOORD_0"
       }
     ],
     "truncated": false
@@ -32,7 +44,7 @@
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 40061340
+        "byteLength": 41100088
       },
       {
         "pointer": "/images/0",
@@ -75,14 +87,14 @@
       }
     ],
     "animationCount": 0,
-    "materialCount": 6,
+    "materialCount": 8,
     "hasMorphTargets": false,
     "hasSkins": false,
     "hasTextures": true,
     "hasDefaultScene": true,
-    "drawCallCount": 8,
-    "totalVertexCount": 287940,
-    "totalTriangleCount": 475158,
+    "drawCallCount": 10,
+    "totalVertexCount": 316119,
+    "totalTriangleCount": 529838,
     "maxUVs": 1,
     "maxInfluences": 0,
     "maxAttributes": 4

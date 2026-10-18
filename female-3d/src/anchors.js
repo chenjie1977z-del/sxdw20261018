@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import compatibility from '../assets/anchor-compatibility.json';
 import { computeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
 
 const $=s=>document.querySelector(s),copy=x=>JSON.parse(JSON.stringify(x));
@@ -6,6 +7,8 @@ const uid=()=>crypto.getRandomValues(new Uint32Array(3)).join('-');
 const colorOK=x=>typeof x==='string'&&/^#[0-9a-f]{6}$/i.test(x);
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const vec=a=>new THREE.Vector3(...a);
+const kinds=['label','point','line','curve','circle','triangle','rectangle','pen'];
+const names={label:'定位与文字',point:'点',line:'直线',curve:'弧线',circle:'圆',triangle:'三角形',rectangle:'长方形',pen:'体表描线'};
 
 export function createSurfaceAnnotations(api){
  const {scene,body,canvas}=api,geometry=body.geometry;
@@ -38,33 +41,60 @@ export function createSurfaceAnnotations(api){
   return {anchor:anchorAtLocal(hit.point,hit.faceIndex),distance:hit.distance};
  }
  function surfaceAt(clientX,clientY){
-  const rect=canvas.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1),api.getCamera());
+  api.getCamera().updateMatrixWorld();const rect=canvas.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1),api.getCamera());
   return ray.intersectObject(body,false)[0]||null;
  }
  const offset=a=>{const p=pointFromAnchor(a);return p.point.addScaledVector(p.normal,.0015);};
  function dispose(group){group.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose();}});group.removeFromParent();}
  function basic(color){return new THREE.MeshBasicMaterial({color,depthTest:$('#anchor-occlude').checked,depthWrite:false,toneMapped:false});}
  function sphere(group,p,r,color,id,part){const haloMat=basic('#10232c');haloMat.side=THREE.FrontSide;const halo=new THREE.Mesh(new THREE.SphereGeometry(r*1.35,12,8),haloMat);halo.position.copy(p);halo.userData={id,part};halo.renderOrder=1;group.add(halo);const o=new THREE.Mesh(new THREE.SphereGeometry(r,12,8),basic(color));o.position.copy(p);o.userData={id,part};o.renderOrder=2;group.add(o);return o;}
- function tube(group,points,r,color,id,part='body'){
+ function tube(group,points,r,color,id,part='body',linear=false){
   if(points.length<2||points.every(p=>p.distanceToSquared(points[0])<1e-12))return;
-  const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');
+  const curve=linear?new THREE.CurvePath():new THREE.CatmullRomCurve3(points,false,'centripetal');
+  if(linear)for(let i=1;i<points.length;i++)curve.add(new THREE.LineCurve3(points[i-1],points[i]));
   const segments=Math.max(12,Math.min(160,points.length*2)),haloMat=basic('#10232c');haloMat.side=THREE.FrontSide;const halo=new THREE.Mesh(new THREE.TubeGeometry(curve,segments,r*1.8,6,false),haloMat);halo.userData={id,part};halo.renderOrder=1;group.add(halo);
   const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,segments,r,6,false),basic(color));mesh.userData={id,part};mesh.renderOrder=2;group.add(mesh);return curve;
  }
- function labelTexture(text,color){
-  const c=document.createElement('canvas'),ctx=c.getContext('2d');const lines=text.match(/.{1,20}/gu)||[''];
-  ctx.font='52px "Microsoft YaHei",sans-serif';const width=Math.ceil(Math.max(...lines.map(l=>ctx.measureText(l).width),32))+40;
-  c.width=width;c.height=lines.length*66+24;
-  ctx.fillStyle='rgba(18,31,38,.90)';ctx.beginPath();ctx.roundRect(2,2,c.width-4,c.height-4,14);ctx.fill();
-  ctx.strokeStyle='#e5ecef';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle=color;ctx.font='52px "Microsoft YaHei",sans-serif';ctx.textBaseline='top';
-  lines.forEach((l,i)=>ctx.fillText(l,20,14+i*66));const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.userData.lines=lines.length;return tex;
+ function labelTexture(m){
+  const c=document.createElement('canvas'),ctx=c.getContext('2d'),width=m.labelWidth||180,height=m.labelHeight||72;
+  c.width=width*2;c.height=height*2;
+  let font=40*(m.fontSize||1),lines=[];
+  const wrap=()=>{ctx.font=`${font}px "Microsoft YaHei",sans-serif`;lines=[''];for(const ch of m.text){let i=lines.length-1;if(ch==='\n'){lines.push('');continue;}if(ctx.measureText(lines[i]+ch).width>c.width-32&&lines[i]){lines.push(ch);}else lines[i]+=ch;}};
+  wrap();while(lines.length*font*1.24>c.height-24&&font>6){font-=1;wrap();}
+  ctx.fillStyle='rgba(18,31,38,.90)';ctx.beginPath();ctx.roundRect(2,2,c.width-4,c.height-4,12);ctx.fill();
+  ctx.strokeStyle='#e5ecef';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=m.color;ctx.textBaseline='top';
+  lines.forEach((l,i)=>ctx.fillText(l,16,12+i*font*1.24));const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.userData.lines=lines.length;return tex;
+ }
+ function frame(){
+  const q=api.getCamera().quaternion,inv=body.matrixWorld.clone().invert();
+  return [new THREE.Vector3(1,0,0).applyQuaternion(q).transformDirection(inv).toArray(),new THREE.Vector3(0,1,0).applyQuaternion(q).transformDirection(inv).toArray()];
+ }
+ function shapePoints(m){
+  const anchors=m.anchors.map(offset),raw=[];
+  if(m.kind==='circle'){
+   const center=anchors[0],radial=anchors[1].clone().sub(center),radius=radial.length(),u=radial.clone().normalize();
+   const basis=m.frame||[[1,0,0],[0,1,0]],normal=vec(basis[0]).cross(vec(basis[1])).transformDirection(body.matrixWorld);
+   let v=normal.cross(u).normalize();if(v.lengthSq()<.1)v=pointFromAnchor(m.anchors[0]).normal.cross(u).normalize();
+   for(let i=0;i<=96;i++){const t=i/96*Math.PI*2;raw.push(center.clone().addScaledVector(u,radius*Math.cos(t)).addScaledVector(v,radius*Math.sin(t)));}
+  }else{
+   let corners=anchors;
+   if(m.kind==='rectangle'){
+    const right=vec((m.frame||[[1,0,0],[0,1,0]])[0]).transformDirection(body.matrixWorld),delta=anchors[1].clone().sub(anchors[0]);
+    const horizontal=right.multiplyScalar(delta.dot(right));corners=[anchors[0],anchors[0].clone().add(horizontal),anchors[1],anchors[1].clone().sub(horizontal)];
+   }
+   for(let i=0;i<corners.length;i++)for(let j=0;j<20;j++)raw.push(corners[i].clone().lerp(corners[(i+1)%corners.length],j/20));raw.push(corners[0].clone());
+  }
+  if(!m.follow)return {points:raw,fallback:false};
+  let failed=false;const projected=raw.map(p=>{const h=nearest(p);if(h.distance>.06)failed=true;return offset(h.anchor);});
+  for(let i=1;i<projected.length;i++)if(projected[i].distanceTo(projected[i-1])>.035)failed=true;
+  return {points:failed?raw:projected,fallback:failed};
  }
  function curvePoints(m){
   const a=pointFromAnchor(m.anchors[0]),b=pointFromAnchor(m.anchors[1]),start=offset(m.anchors[0]),end=offset(m.anchors[1]);
   const chord=end.clone().sub(start),normal=a.normal.clone().add(b.normal).normalize();if(normal.lengthSq()<.1)normal.copy(a.normal);
   let sideways=chord.clone().cross(normal).normalize();if(sideways.lengthSq()<.1)sideways.set(1,0,0);
-  const middle=start.clone().add(end).multiplyScalar(.5).addScaledVector(sideways,chord.length()*m.bend*2);
-  if(!m.follow)middle.addScaledVector(normal,Math.abs(m.bend)*chord.length()*.45);
+  const middle=start.clone().add(end).multiplyScalar(.5).addScaledVector(sideways,chord.length()*(m.kind==='line'?0:m.bend)*2);
+  if(!m.follow&&m.kind!=='line')middle.addScaledVector(normal,Math.abs(m.bend)*chord.length()*.45);
   const curve=new THREE.QuadraticBezierCurve3(start,middle,end),raw=curve.getPoints(64);
   if(!m.follow)return {points:raw,fallback:false};
   let failed=false;const projected=raw.map(p=>{const h=nearest(p);if(h.distance>.06)failed=true;return offset(h.anchor);});
@@ -75,9 +105,9 @@ export function createSurfaceAnnotations(api){
   for(const g of groups.values())dispose(g);groups.clear();
   for(const m of marks){
    const g=new THREE.Group();g.name=`Annotation_${m.id}`;root.add(g);groups.set(m.id,g);const r=.0009*m.size;
-   let pts=m.kind==='curve'?curvePoints(m).points:m.anchors.map(offset);
-   if(m.closed&&pts.length>2)pts=[...pts,pts[0].clone()];
-   if(m.kind==='curve'){
+   let pts=m.anchors.map(offset);
+   if(m.kind==='pen'&&m.closed&&pts.length>2)pts=[...pts,pts[0].clone()];
+   if(['curve','line'].includes(m.kind)){
     const result=curvePoints(m);pts=result.points;m.fallback=result.fallback;
     const curve=tube(g,pts,r,m.color,m.id);
     if(curve&&m.ticks){
@@ -93,15 +123,17 @@ export function createSurfaceAnnotations(api){
      const tangent=curve.getTangentAt(1),tip=pts.at(-1),cone=new THREE.Mesh(new THREE.ConeGeometry(.0035*m.size,.010*m.size,12),basic(m.color));
      cone.position.copy(tip).addScaledVector(tangent,-.005*m.size);cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tangent);cone.userData={id:m.id,part:'body'};g.add(cone);
     }
-   }else if(m.kind==='pen')tube(g,pts,r,m.color,m.id);
+   }else if(['circle','rectangle','triangle'].includes(m.kind)){const result=shapePoints(m);pts=result.points;m.fallback=result.fallback;tube(g,pts,r,m.color,m.id,'body',true);}
+   else if(m.kind==='pen')tube(g,pts,r,m.color,m.id);
    const handleAnchors=m.kind==='pen'?[m.anchors[0],m.anchors.at(-1)]:m.anchors;
-   handleAnchors.forEach((a,i)=>sphere(g,offset(a),m.kind==='label'?.0035*m.size:(m.id===selected?.005:.0028)*m.size,m.id===selected?'#46cde0':m.color,m.id,`anchor:${m.kind==='pen'?(i===0?0:m.anchors.length-1):i}`));
+   handleAnchors.forEach((a,i)=>sphere(g,offset(a),['label','point'].includes(m.kind)?.0035*m.size:(m.id===selected?.005:.0028)*m.size,m.id===selected?'#46cde0':m.color,m.id,`anchor:${m.kind==='pen'?(i===0?0:m.anchors.length-1):i}`));
    if(m.text){
-    const origin=m.kind==='label'?pts[0]:pts[Math.floor(pts.length/2)],labelPos=origin.clone().add(vec(m.labelOffset));
-    tube(g,[origin,labelPos],r*.60,m.color,m.id,'label');
+    const origin=['label','point','circle'].includes(m.kind)?pts[0]:pts[Math.floor(pts.length/2)],labelPos=origin.clone().add(vec(m.labelOffset));
+    tube(g,[origin,labelPos],r*.22,m.color,m.id,'label');
     // Occlusion is decided at surface anchors; keep the full caption readable.
-    const map=labelTexture(m.text,m.color),sprite=new THREE.Sprite(new THREE.SpriteMaterial({map,depthTest:false,depthWrite:false,toneMapped:false}));sprite.renderOrder=3;
-    sprite.position.copy(labelPos);sprite.userData={id:m.id,part:'label',label:true,size:m.size,lines:map.userData.lines,aspect:map.image.width/map.image.height};g.add(sprite);
+    const map=labelTexture(m),sprite=new THREE.Sprite(new THREE.SpriteMaterial({map,depthTest:false,depthWrite:false,toneMapped:false}));sprite.renderOrder=3;
+    sprite.position.copy(labelPos);sprite.userData={id:m.id,part:'label',label:true,size:m.size,width:m.labelWidth||180,height:m.labelHeight||72,lines:map.userData.lines};g.add(sprite);
+    if(m.id===selected&&tool==='select'){const handle=new THREE.Sprite(new THREE.SpriteMaterial({color:'#46cde0',depthTest:false,depthWrite:false,toneMapped:false}));handle.renderOrder=5;handle.userData={id:m.id,part:'resize',resize:true};g.add(handle);}
    }
   }
   dirty=true;sync();
@@ -111,29 +143,29 @@ export function createSurfaceAnnotations(api){
   const units=camera.isOrthographicCamera?(camera.top-camera.bottom)/(camera.zoom*rect.height):2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.position.distanceTo(p)/rect.height;
   const sign=p.clone().project(camera).x<0?-1:1;
   const labelOffset=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion).multiplyScalar(units*140*sign).add(new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion).multiplyScalar(units*45)).toArray();
-  return {id:uid(),kind,anchors,text:$('#anchor-text').value.trim()||(kind==='label'?`标注 ${marks.length+1}`:''),color:$('#anchor-color').value,size:Number($('#anchor-size').value),bend:Number($('#anchor-bend').value),ticks:$('#anchor-ticks').checked,divisions:Number($('#anchor-divisions').value),follow:$('#anchor-follow').checked,arrow:$('#anchor-arrow').checked,closed:$('#anchor-closed').checked,visible:true,labelOffset};
+  return {id:uid(),kind,anchors,text:$('#anchor-text').value.trim()||(kind==='label'?`标注 ${marks.length+1}`:''),color:$('#anchor-color').value,size:Number($('#anchor-size').value),bend:Number($('#anchor-bend').value),ticks:$('#anchor-ticks').checked,divisions:Number($('#anchor-divisions').value),follow:$('#anchor-follow').checked,arrow:$('#anchor-arrow').checked,closed:$('#anchor-closed').checked,visible:true,labelOffset,labelWidth:THREE.MathUtils.clamp(Number($('#anchor-label-width').value)||180,70,600),labelHeight:THREE.MathUtils.clamp(Number($('#anchor-label-height').value)||72,40,400),fontSize:THREE.MathUtils.clamp(Number($('#anchor-font').value)||1,.4,3),frame:frame()};
  }
  function sync(){
   const m=current(),list=$('#anchor-list');list.replaceChildren(new Option('选择已有三维标注',''));
-  for(const item of marks)list.add(new Option(`${item.visible?'':'[隐藏] '}${item.text||({label:'定位标注',curve:'两点连线',pen:'体表描线'}[item.kind])}`,item.id));
-  list.value=selected||'';$('#anchor-count').textContent=`${marks.length} 条三维标注${pending?' · 请选第二个端点':''}`;
+  for(const item of marks)list.add(new Option(`${item.visible?'':'[隐藏] '}${item.text||names[item.kind]}`,item.id));
+  list.value=selected||'';$('#anchor-count').textContent=`${marks.length} 条三维标注${pending?' · 请继续点选控制点':''}`;
   $('#anchor-undo').disabled=!undo.length;$('#anchor-redo').disabled=!redo.length;$('#anchor-delete').disabled=!m;
   $('#anchor-bend-value').textContent=Number($('#anchor-bend').value).toFixed(2);$('#anchor-size-value').textContent=Number($('#anchor-size').value).toFixed(1);
-  $('#anchor-warning').textContent=m?.fallback?'两点之间跨越空隙，当前显示为空间曲线；两个端点仍贴肤。':'';
-  if(m){$('#anchor-text').value=m.text;$('#anchor-color').value=m.color;$('#anchor-size').value=m.size;$('#anchor-bend').value=m.bend;$('#anchor-ticks').checked=m.ticks;$('#anchor-divisions').value=m.divisions;$('#anchor-follow').checked=m.follow;$('#anchor-arrow').checked=m.arrow;$('#anchor-closed').checked=m.closed;$('#anchor-item-visible').checked=m.visible;$('#anchor-size-value').textContent=m.size.toFixed(1);$('#anchor-bend-value').textContent=m.bend.toFixed(2);}
+  $('#anchor-warning').textContent=m?.fallback?'轮廓跨越空隙或投射过深，当前显示为空间轮廓；控制点仍贴肤。':'';
+  if(m){$('#anchor-label-width').value=m.labelWidth||180;$('#anchor-label-height').value=m.labelHeight||72;$('#anchor-font').value=m.fontSize||1;$('#anchor-text').value=m.text;$('#anchor-color').value=m.color;$('#anchor-size').value=m.size;$('#anchor-bend').value=m.bend;$('#anchor-ticks').checked=m.ticks;$('#anchor-divisions').value=m.divisions;$('#anchor-follow').checked=m.follow;$('#anchor-arrow').checked=m.arrow;$('#anchor-closed').checked=m.closed;$('#anchor-item-visible').checked=m.visible;$('#anchor-size-value').textContent=m.size.toFixed(1);$('#anchor-bend-value').textContent=m.bend.toFixed(2);}
  }
  function setTool(next){
   tool=next;pending=null;draft=null;drag=null;disposePending();controls(true);
   if(next!=='rotate')api.stopRotate();
-  if(['label','curve','pen'].includes(next))selected=null;
+  if(kinds.includes(next))selected=null;
   document.querySelectorAll('[data-anchor-tool]').forEach(b=>b.classList.toggle('active',b.dataset.anchorTool===next));
   canvas.style.cursor=next==='rotate'?'':next==='select'?'default':'crosshair';rebuild();
  }
  function disposePending(){for(const child of [...pendingRoot.children])dispose(child);}
  function select(id){selected=marks.some(m=>m.id===id)?id:null;rebuild();}
  function add(m){if(marks.length>=120){api.message('最多 120 条三维标注，请先保存并拆分课件。');return false;}remember();marks.push(m);selected=m.id;setTool('select');return true;}
- function pointerRay(e){const r=canvas.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),api.getCamera());}
- function pick(e){if(!root.visible)return null;pointerRay(e);const hits=ray.intersectObjects([...groups.values()].filter(g=>g.visible),true);return hits.find(h=>h.object.userData.part?.startsWith('anchor:'))||hits[0]||null;}
+ function pointerRay(e){api.getCamera().updateMatrixWorld();const r=canvas.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),api.getCamera());}
+ function pick(e){update();root.updateWorldMatrix(true,true);if(!root.visible)return null;pointerRay(e);const hits=ray.intersectObjects([...groups.values()].filter(g=>g.visible),true);return hits.find(h=>h.object.userData.part==='resize')||hits.find(h=>h.object.userData.part?.startsWith('anchor:'))||hits[0]||null;}
  function changed(){rebuild();}
  canvas.addEventListener('pointerdown',e=>{
   if(suspended||tool==='rotate'||e.button!==0)return;
@@ -158,7 +190,9 @@ export function createSurfaceAnnotations(api){
   if(!drag||drag.create||Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<3)return;
   const m=current();if(!m)return;
   if(!drag.remembered){remember();drag.remembered=true;}
-  if(drag.part==='label'){
+  if(drag.part==='resize'){
+   const factor=drag.original.size||1;m.labelWidth=THREE.MathUtils.clamp(Math.round((drag.original.labelWidth||180)+(e.clientX-drag.x)*2/factor),70,600);m.labelHeight=THREE.MathUtils.clamp(Math.round((drag.original.labelHeight||72)+(e.clientY-drag.y)*2/factor),40,400);
+  }else if(drag.part==='label'){
    pointerRay(e);const p=ray.ray.intersectPlane(drag.plane,new THREE.Vector3());if(p&&drag.at){const delta=p.sub(drag.at);m.labelOffset=vec(drag.original.labelOffset).add(delta).clampScalar(-3,3).toArray();}
   }else{
    const hit=surfaceAt(e.clientX,e.clientY);
@@ -171,9 +205,13 @@ export function createSurfaceAnnotations(api){
   if(suspended)return;
   if(draft){if(!cancelled&&draft.anchors.length>1)add(defaults('pen',draft.anchors));draft=null;disposePending();}
   if(drag?.create&&!cancelled&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8){
-   if(drag.create==='label')add(defaults('label',[drag.anchor]));
-   else if(pending){if(offset(pending).distanceTo(offset(drag.anchor))>.002){add(defaults('curve',[pending,drag.anchor]));pending=null;disposePending();}}
-   else{pending=drag.anchor;disposePending();sphere(pendingRoot,offset(pending),.005,$('#anchor-color').value,'draft','body');}
+   if(['label','point'].includes(drag.create))add(defaults(drag.create,[drag.anchor]));
+   else if(!pending){pending={kind:drag.create,anchors:[drag.anchor]};disposePending();sphere(pendingRoot,offset(drag.anchor),.005,$('#anchor-color').value,'draft','body');}
+   else if(offset(pending.anchors.at(-1)).distanceTo(offset(drag.anchor))>.002){
+    pending.anchors.push(drag.anchor);
+    if(pending.anchors.length===(drag.create==='triangle'?3:2)){const m=defaults(drag.create,pending.anchors);pending=null;add(m);disposePending();}
+    else sphere(pendingRoot,offset(drag.anchor),.005,$('#anchor-color').value,'draft','body');
+   }
   }
   drag=null;controls(true);sync();
  }
@@ -185,9 +223,9 @@ export function createSurfaceAnnotations(api){
  },{capture:true,passive:false});
  document.querySelectorAll('[data-anchor-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.anchorTool));
  $('#anchor-list').onchange=e=>{const id=e.target.value;setTool('select');select(id);};
- const fields={text:'anchor-text',color:'anchor-color',size:'anchor-size',bend:'anchor-bend',ticks:'anchor-ticks',divisions:'anchor-divisions',follow:'anchor-follow',arrow:'anchor-arrow',closed:'anchor-closed',visible:'anchor-item-visible'};
+ const fields={text:'anchor-text',color:'anchor-color',size:'anchor-size',bend:'anchor-bend',ticks:'anchor-ticks',divisions:'anchor-divisions',follow:'anchor-follow',arrow:'anchor-arrow',closed:'anchor-closed',visible:'anchor-item-visible',labelWidth:'anchor-label-width',labelHeight:'anchor-label-height',fontSize:'anchor-font'};
  for(const [key,id] of Object.entries(fields)){
-  const input=$('#'+id);input.addEventListener('change',()=>{const m=current();if(!m){sync();return;}remember();m[key]=input.type==='checkbox'?input.checked:['size','bend','divisions'].includes(key)?Number(input.value):input.value;changed();});
+  const input=$('#'+id);input.addEventListener('change',()=>{const m=current();if(!m){sync();return;}remember();if(input.type==='number')input.value=THREE.MathUtils.clamp(Number(input.value)||Number(input.min),Number(input.min),Number(input.max));m[key]=input.type==='checkbox'?input.checked:['size','bend','divisions','labelWidth','labelHeight','fontSize'].includes(key)?Number(input.value):input.value;changed();});
   if(input.type==='range')input.addEventListener('input',()=>{$('#'+(key==='size'?'anchor-size-value':'anchor-bend-value')).textContent=Number(input.value).toFixed(key==='size'?1:2);});
  }
  $('#anchor-delete').onclick=()=>{if(!current())return;remember();marks=marks.filter(m=>m.id!==selected);selected=null;changed();};
@@ -205,16 +243,47 @@ export function createSurfaceAnnotations(api){
   if(e.key==='Escape')setTool('rotate');
   if((e.key==='Delete'||e.key==='Backspace')&&current()){e.preventDefault();$('#anchor-delete').click();}
  });
+ const menu=$('#viewer-context'),rename=$('#rename-dialog');let rightStart=null,rightMoved=false,requestedContext=null;
+ const closeMenu=()=>{menu.hidden=true;};
+ function command(label,action){const b=document.createElement('button');b.type='button';b.role='menuitem';b.textContent=label;b.onclick=()=>{closeMenu();action();};menu.append(b);return b;}
+ function renameSelected(){const m=current();if(!m)return;$('#rename-value').value=m.text;rename.showModal();$('#rename-value').focus();}
+ $('#rename-form').onsubmit=e=>{e.preventDefault();const m=current();if(m){remember();m.text=$('#rename-value').value.trim();rebuild();}rename.close();};
+ $('#rename-cancel').onclick=()=>rename.close();
+ canvas.addEventListener('pointerdown',e=>{closeMenu();if(e.button===2){rightStart={x:e.clientX,y:e.clientY};rightMoved=false;requestedContext=null;}},true);
+ canvas.addEventListener('pointermove',e=>{if(rightStart&&Math.hypot(e.clientX-rightStart.x,e.clientY-rightStart.y)>5)rightMoved=true;},true);
+ function openContext(e){
+  if(suspended||rightMoved)return;const hit=pick(e);menu.replaceChildren();
+  if(hit){const id=hit.object.userData.id;setTool('select');select(id);
+   command('重命名 / 修改文字',renameSelected);command('删除标注',()=>$('#anchor-delete').click());
+   command('文字框放大',()=>{const m=current();if(m){remember();m.labelWidth=Math.min(600,(m.labelWidth||180)*1.15);m.labelHeight=Math.min(400,(m.labelHeight||72)*1.15);rebuild();}});
+   command('图形范围放大',()=>$('#anchor-grow').click());command('图形范围缩小',()=>$('#anchor-shrink').click());
+   command('隐藏标注（在列表中恢复）',()=>{remember();current().visible=false;rebuild();});
+  }else{
+   command('旋转观察',()=>setTool('rotate'));command('选择 / 拖动标注',()=>setTool('select'));
+   command('恢复正面视图',()=>api.setView('front'));command('背面视图',()=>api.setView('back'));command('面部特写',()=>api.setView('face'));
+   for(const k of ['label','point','line','circle','triangle','rectangle'])command('添加'+names[k],()=>setTool(k));
+   command('切换背景色',()=>{const themes=['ivory','slate','mist'];api.setTheme(themes[(themes.indexOf(api.getTheme())+1)%3]);});
+   command('显示 / 隐藏全部标注',()=>{$('#anchor-visible').checked=!$('#anchor-visible').checked;dirty=true;});
+   command('导出 4K 图片',()=>$('#export').click());command('保存三维课件',()=>$('#anchor-save').click());
+  }
+  menu.hidden=false;menu.style.left=Math.min(e.clientX,window.innerWidth-menu.offsetWidth-8)+'px';menu.style.top=Math.max(8,Math.min(e.clientY,window.innerHeight-menu.offsetHeight-8))+'px';menu.querySelector('button')?.focus();
+ }
+ canvas.addEventListener('contextmenu',e=>{if(suspended)return;e.preventDefault();if(e.buttons&2)requestedContext={clientX:e.clientX,clientY:e.clientY};else openContext(e);});
+ canvas.addEventListener('pointerup',e=>{if(e.button===2&&requestedContext){if(!rightMoved)openContext(requestedContext);requestedContext=null;}});
+ document.addEventListener('pointerdown',e=>{if(!menu.contains(e.target))closeMenu();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});window.addEventListener('resize',closeMenu);canvas.addEventListener('wheel',closeMenu,{passive:true});
  function project(){const result=copy(marks);result.forEach(m=>delete m.fallback);return {format:'female-3d-surface-annotations',version:1,modelKey,theme:api.getTheme(),annotations:result};}
  function validate(value){
-  if(value?.format!=='female-3d-surface-annotations'||value.version!==1||value.modelKey!==modelKey)throw Error('不是本版模型的三维课件；不同模型版本不能直接复用锚点，以免错位。');
+  if(value?.format!=='female-3d-surface-annotations'||value.version!==1||(value.modelKey!==modelKey&&!(compatibility.current_model_key===modelKey&&compatibility.ordered_triangle_uvs_exactly_equal&&value.modelKey===compatibility.previous_model_key)))throw Error('不是本版模型的三维课件；不同模型版本不能直接复用锚点，以免错位。');
   if(!Array.isArray(value.annotations)||value.annotations.length>120)throw Error('三维标注数量无效。');
   const seen=new Set();
   for(const m of value.annotations){
-   if(!m||typeof m.id!=='string'||m.id.length>100||seen.has(m.id)||!['label','curve','pen'].includes(m.kind)||typeof m.text!=='string'||m.text.length>80||!colorOK(m.color)||!finite(m.size)||m.size<.3||m.size>3||!finite(m.bend)||Math.abs(m.bend)>.8||!Number.isInteger(m.divisions)||m.divisions<2||m.divisions>20)throw Error('三维标注属性无效。');seen.add(m.id);
+   if(!m||typeof m.id!=='string'||m.id.length>100||seen.has(m.id)||!kinds.includes(m.kind)||typeof m.text!=='string'||m.text.length>80||!colorOK(m.color)||!finite(m.size)||m.size<.3||m.size>3||!finite(m.bend)||Math.abs(m.bend)>.8||!Number.isInteger(m.divisions)||m.divisions<2||m.divisions>20)throw Error('三维标注属性无效。');seen.add(m.id);
    if(!['ticks','follow','arrow','closed','visible'].every(k=>typeof m[k]==='boolean'))throw Error('显示属性无效。');
+   for(const [key,lo,hi] of [['labelWidth',70,600],['labelHeight',40,400],['fontSize',.4,3]])if(m[key]!==undefined&&(!finite(m[key])||m[key]<lo||m[key]>hi))throw Error('文字框大小无效。');
+   if(m.frame!==undefined&&(!Array.isArray(m.frame)||m.frame.length!==2||m.frame.some(a=>!Array.isArray(a)||a.length!==3||a.some(n=>!finite(n))||Math.abs(vec(a).length()-1)>.01)||Math.abs(vec(m.frame[0]).dot(vec(m.frame[1])))>.01))throw Error('图形平面无效。');
    if(!Array.isArray(m.labelOffset)||m.labelOffset.length!==3||m.labelOffset.some(n=>!finite(n)||Math.abs(n)>3))throw Error('标签位置无效。');
-   if(!Array.isArray(m.anchors)||m.anchors.length<1||m.anchors.length>512||(m.kind==='label'&&m.anchors.length!==1)||(m.kind==='curve'&&m.anchors.length!==2)||(m.kind==='pen'&&m.anchors.length<2))throw Error('锚点数量无效。');
+   if(!Array.isArray(m.anchors)||m.anchors.length<1||m.anchors.length>512||(['label','point'].includes(m.kind)&&m.anchors.length!==1)||(['curve','line','circle','rectangle'].includes(m.kind)&&m.anchors.length!==2)||(m.kind==='triangle'&&m.anchors.length!==3)||(m.kind==='pen'&&m.anchors.length<2))throw Error('锚点数量无效。');
    for(const a of m.anchors)if(!Number.isInteger(a.face)||a.face<0||a.face>=index.count/3||!Array.isArray(a.bary)||a.bary.length!==3||a.bary.some(n=>!finite(n)||n<-.0001||n>1.0001)||Math.abs(a.bary.reduce((x,y)=>x+y,0)-1)>.0001)throw Error('表面锚点无效。');
   }
   return copy(value.annotations);
@@ -233,10 +302,15 @@ export function createSurfaceAnnotations(api){
   if(signature===lastCamera&&!dirty)return;lastCamera=signature;dirty=false;
   root.visible=$('#anchor-visible').checked;
   for(const m of marks){const g=groups.get(m.id);const samples=m.anchors.filter((a,i)=>i===0||i===m.anchors.length-1||i%Math.max(1,Math.floor(m.anchors.length/6))===0);g.visible=m.visible&&(!$('#anchor-occlude').checked||!samples.every(occluded));
-   g.traverse(o=>{if(!o.userData.label)return;const distance=camera.position.distanceTo(o.position),worldPerPixel=camera.isOrthographicCamera?(camera.top-camera.bottom)/(camera.zoom*rect.height):2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*distance/rect.height;const height=30*m.size*o.userData.lines*worldPerPixel;o.scale.set(height*o.userData.aspect,height,1);});
+   let caption=null,handle=null;
+   g.traverse(o=>{if(o.userData.label)caption=o;if(o.userData.resize)handle=o;});
+   if(caption){const distance=camera.position.distanceTo(caption.position),worldPerPixel=camera.isOrthographicCamera?(camera.top-camera.bottom)/(camera.zoom*rect.height):2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*distance/rect.height;
+    caption.scale.set(caption.userData.width*m.size*worldPerPixel,caption.userData.height*m.size*worldPerPixel,1);
+    if(handle){const right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion),up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);handle.position.copy(caption.position).addScaledVector(right,caption.scale.x/2).addScaledVector(up,-caption.scale.y/2);handle.scale.setScalar(12*worldPerPixel);}
+   }
   }
  }
- function setSuspended(value){suspended=value;$('#anchor-panel').hidden=value;$('#background-controls').hidden=value;if(value){setTool('rotate');controls(false);}else controls(true);}
+ function setSuspended(value){suspended=value;closeMenu();$('#anchor-panel').hidden=value;$('#background-controls').hidden=value;if(value){setTool('rotate');controls(false);}else controls(true);}
  sync();setTool('rotate');
  return {update,setSuspended,setTool,project,importProject,validate,pointFromAnchor,fromHit,nearest,surfaceAt,add,defaults,select,root,modelKey,get annotations(){return marks;},get selected(){return selected;},get tool(){return tool;}};
 }

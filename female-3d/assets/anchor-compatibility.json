@@ -1,0 +1,10 @@
+{
+  "previous_model_key": "female-surface-263092-1284288-3ee2604a",
+  "current_model_key": "female-surface-263091-1284288-83e70916",
+  "previous_glb_sha256": "6b029dc486b3b44efae0859dbc5708de85316dbd75e70fb0b3866f0f6a0b6be6",
+  "current_glb_sha256": "f6034818eea3e0dddddab8f28bd68b41fddd3ae82706f1dd3ef62b1228affa9c",
+  "triangle_corners_compared": 1284288,
+  "ordered_triangle_uvs_exactly_equal": true,
+  "maximum_vertex_shift_m": 0.0048809051513671875,
+  "interpretation": "Same triangle and corner order; barycentric anchors follow the edited surface. Label offsets and sizes are preserved. Only this verified previous key is accepted."
+}

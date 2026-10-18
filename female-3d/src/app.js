@@ -33,8 +33,8 @@ const softFront=new THREE.DirectionalLight(0xfff4ec,.65);softFront.position.set(
 const floor=new THREE.Mesh(new THREE.CircleGeometry(.66,96),new THREE.MeshBasicMaterial({color:0xe2e7de}));floor.rotation.x=-Math.PI/2;floor.position.y=-.006;scene.add(floor);
 const grid=new THREE.GridHelper(2,20,0xc5d1c8,0xe2e6dd);grid.position.y=-.004;scene.add(grid);
 const themes={ivory:{background:'#f5f4ef',floor:'#e2e7de',grid:'#c5d1c8'},slate:{background:'#29343d',floor:'#36454e',grid:'#566975'},mist:{background:'#46525a',floor:'#536269',grid:'#788b93'}};
-function setTheme(name){if(!themes[name])return;theme=name;const p=themes[name];scene.background.set(p.background);floor.material.color.set(p.floor);grid.material.color.set(p.grid);$('.stage').dataset.theme=name;document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===name));}
-document.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>setTheme(b.dataset.theme));
+function setTheme(name){if(!themes[name])return;theme=name;const p=themes[name];scene.background.set(p.background);floor.material.color.set(p.floor);grid.material.color.set(p.grid);$('.stage').dataset.theme=name;document.querySelectorAll('button[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===name));}
+document.querySelectorAll('button[data-theme]').forEach(b=>b.onclick=()=>setTheme(b.dataset.theme));
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
 const landmarkGroup=new THREE.Group();scene.add(landmarkGroup);landmarkGroup.visible=false;
 const labels=[];
@@ -65,9 +65,10 @@ const views={front:{p:[0,.85,3.4],t:[0,.85,0],n:'正面观察'},back:{p:[0,.85,-
  kneeback:{p:[0,.445,-2],t:[0,.445,0],z:5,n:'腘窝与横纹观察'},
  wrist:{p:[.50,1.01,-1.2],t:[.431,1.01,.16],z:7,n:'掌侧腕横纹观察'}};
 function setView(name){
+ const damping=controls.enableDamping;controls.enableDamping=false;controls.update();controls.enableDamping=damping;
  const v=views[name];camera.position.set(...v.p);controls.target.set(...v.t);ortho.zoom=v.z||1;ortho.updateProjectionMatrix();
  if(camera===perspective&&v.z)camera.position.copy(controls.target).add(new THREE.Vector3(...v.p).sub(new THREE.Vector3(...v.t)).normalize().multiplyScalar(name==='face'?.38:name==='neck'?.65:.85));
- controls.update();$('#view-name').textContent=v.n;
+ controls.update();camera.updateMatrixWorld();$('#view-name').textContent=v.n;
  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
 }
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
@@ -138,7 +139,7 @@ try{
   model.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.name==='Female_Surface')body=o;triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;for(const m of Array.isArray(o.material)?o.material:[o.material]){if(!materials.some(x=>x.material===m))materials.push({material:m,color:m.color.clone(),map:m.map,normalMap:m.normalMap,roughness:m.roughness});}}});
   $('#loading').style.display='none';$('#status').textContent=`${Math.round(triangles/1000)}k 三角面 · 合成身高 165 cm`;setView('front');
   model.updateMatrixWorld(true);
-  anchors=createSurfaceAnnotations({scene,body,canvas:renderer.domElement,getCamera:()=>camera,getControls:()=>controls,message,getTheme:()=>theme,setTheme,stopRotate(){controls.autoRotate=false;$('#rotate').checked=false;measuring=false;$('#measure').classList.remove('active');clearMeasure();const damping=controls.enableDamping;controls.enableDamping=false;controls.update();controls.enableDamping=damping;}});
+  anchors=createSurfaceAnnotations({scene,body,canvas:renderer.domElement,setView,getCamera:()=>camera,getControls:()=>controls,message,getTheme:()=>theme,setTheme,stopRotate(){controls.autoRotate=false;$('#rotate').checked=false;measuring=false;$('#measure').classList.remove('active');clearMeasure();const damping=controls.enableDamping;controls.enableDamping=false;controls.update();controls.enableDamping=damping;}});
   teaching=createTeachingTools({capture:captureSnapshot,message,getViewName:()=>$('#view-name').textContent,
    getView:()=>({projection:camera===ortho?'orthographic':'perspective',position:camera.position.toArray(),target:controls.target.toArray(),zoom:camera.zoom}),
    setActive(active){annotationActive=active;anchors.setSuspended(active);controls.enabled=!active;if(active){controls.autoRotate=false;$('#rotate').checked=false;measuring=false;$('#measure').classList.remove('active');clearMeasure();}}
