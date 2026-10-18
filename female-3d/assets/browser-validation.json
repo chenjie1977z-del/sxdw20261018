@@ -1,0 +1,22 @@
+{
+  "loaded": true,
+  "triangles": 535032,
+  "presets": true,
+  "drag_rotation": true,
+  "wheel_zoom": true,
+  "pan": true,
+  "materials": true,
+  "wireframe": true,
+  "markers": true,
+  "projection_switch": true,
+  "auto_rotate": true,
+  "measurement": "空间直线距离：67.6 mm（模型值，非体表弧长）",
+  "export_pixels": [
+    4096,
+    3218
+  ],
+  "page_errors": [],
+  "external_http_requests": [],
+  "offline_embedded_document": true,
+  "file_scheme": "Not tested: managed Chromium blocks file://. Same embedded document tested offline via set_content."
+}

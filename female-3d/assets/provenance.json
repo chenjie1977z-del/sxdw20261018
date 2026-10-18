@@ -1,0 +1,47 @@
+{
+  "source_repository": "https://github.com/makehumancommunity/makehuman",
+  "commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "asset_license": "CC0-1.0",
+  "assets": [
+    {
+      "path": "assets/source/3dobjs/base.obj",
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+      "source_path": "makehuman/data/3dobjs/base.obj"
+    },
+    {
+      "path": "assets/source/targets/macrodetails/asian-female-young.target",
+      "sha256": "095fe79694fa19e1fe98d93009ec116199bd524e081c640351a10eccf2cca1eb",
+      "source_path": "makehuman/data/targets/macrodetails/asian-female-young.target"
+    },
+    {
+      "path": "assets/source/targets/macrodetails/universal-female-young-averagemuscle-averageweight.target",
+      "sha256": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249",
+      "source_path": "makehuman/data/targets/macrodetails/universal-female-young-averagemuscle-averageweight.target"
+    },
+    {
+      "path": "assets/source/targets/torso/torso-muscle-dorsi-incr.target",
+      "sha256": "a9eb27874c600716c4ac058caf922671c6556427f00373d0d31c7615d31ded56",
+      "source_path": "makehuman/data/targets/torso/torso-muscle-dorsi-incr.target"
+    },
+    {
+      "path": "assets/source/targets/stomach/stomach-tone-incr.target",
+      "sha256": "0fc4629f4f38b7c83dadc3a1a650f0db6e8c50f974ff57eb920d4881cadcf0d9",
+      "source_path": "makehuman/data/targets/stomach/stomach-tone-incr.target"
+    },
+    {
+      "path": "assets/source/eyes/high-poly/high-poly.obj",
+      "sha256": "da2493215b708a344c33dc72f2a9a5b8fa985dcc5a70ad3b208995cf871da8e1",
+      "source_path": "makehuman/data/eyes/high-poly/high-poly.obj"
+    },
+    {
+      "path": "assets/source/eyes/high-poly/high-poly.mhclo",
+      "sha256": "b183cfe37120ab726f9b3f2ea6cd3a64c44ce7b4bd91a77c841cf70c04f83a0d",
+      "source_path": "makehuman/data/eyes/high-poly/high-poly.mhclo"
+    },
+    {
+      "path": "assets/source/eyes/materials/brown_eye.png",
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b",
+      "source_path": "makehuman/data/eyes/materials/brown_eye.png"
+    }
+  ]
+}

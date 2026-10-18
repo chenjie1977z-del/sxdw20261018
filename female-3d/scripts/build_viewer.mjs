@@ -1,0 +1,13 @@
+import { build } from 'esbuild';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const bundle=await build({entryPoints:[path.join(root,'src/app.js')],bundle:true,write:false,minify:true,format:'iife',legalComments:'none'});
+const template=fs.readFileSync(path.join(root,'src/template.html'),'utf8');
+const model=fs.readFileSync(path.join(root,'assets/asian-female.glb')).toString('base64');
+fs.copyFileSync(path.join(root,'node_modules/three/LICENSE'),path.join(root,'licenses/THREE-MIT.txt'));
+const notices=['PROJECT-MIT.txt','THREE-MIT.txt','CC0-1.0.txt'].map(name=>name+'\n'+fs.readFileSync(path.join(root,'licenses',name),'utf8')).join('\n\n');
+const html=template.replace('/*__BUNDLE__*/',()=>bundle.outputFiles[0].text.replaceAll('</script','<\\/script')).replace("'__MODEL_BASE64__'",()=>JSON.stringify(model))+'\n<!-- Bundled licenses\n'+notices.replaceAll('--','—')+'\n-->\n';
+fs.writeFileSync(path.join(root,'female-3d.html'),html);
+console.log('Built self-contained offline HTML:',Buffer.byteLength(html),'bytes');

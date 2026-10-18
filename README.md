@@ -2,6 +2,20 @@
 
 直接在本仓库首页向下滚动即可查看图片；点击图片可打开原图并放大。
 
+## 女性 3D 交互样稿
+
+已提供亚洲成年女性体表的真实三维网格与离线查看器，可旋转、缩放、平移、切换标准视角、聚焦肩背、查看线框、测量两点直线距离，并导出 4K PNG。
+
+**[下载离线包](female-3d-offline.zip)** → 解压 → 用 Chrome / Edge 打开其中的 `female-3d/female-3d.html`。GitHub 文件页面和聊天窗口不能直接运行该查看器。
+
+- [打开说明](female-3d/打开说明.md) · [GLB 模型](female-3d/assets/asian-female.glb) · [Blender 可编辑文件](female-3d/assets/asian-female.blend)
+- [正面预览](female-3d/previews/viewer-front.png) · [背面预览](female-3d/previews/viewer-back.png) · [肩背局部](female-3d/previews/viewer-shoulder.png)
+- [来源与许可](female-3d/THIRD_PARTY_NOTICES.md) · [验证范围](female-3d/VALIDATION.md)
+
+[![女性 3D 查看器静态预览](female-3d/previews/viewer-front.png)](female-3d/打开说明.md)
+
+本版是体表概念样稿，不含内部骨骼，尚未经专业解剖校核；体表细分网格的平滑度不等于医学细节准确性。
+
 ## A3 印刷文件
 
 已提供三张精修图的 **4961 × 3508 像素、300 DPI、A3 横版**文件，采用 sRGB 色彩配置、等比例排版、约 10 mm 以上白边，不裁切人物。

@@ -1,0 +1,29 @@
+{
+  "body_height_m": 1.65,
+  "height_is_synthetic": true,
+  "base_vertices": 13380,
+  "base_faces": 13378,
+  "evaluated_body_vertices": 214050,
+  "evaluated_body_triangles": 428096,
+  "boundary_edges": 0,
+  "nonmanifold_edges": 0,
+  "targets": [
+    {
+      "file": "macrodetails/asian-female-young.target",
+      "weight": 1.0
+    },
+    {
+      "file": "macrodetails/universal-female-young-averagemuscle-averageweight.target",
+      "weight": 1.0
+    },
+    {
+      "file": "torso/torso-muscle-dorsi-incr.target",
+      "weight": 0.1
+    },
+    {
+      "file": "stomach/stomach-tone-incr.target",
+      "weight": 0.1
+    }
+  ],
+  "scope": "External surface only; mathematical topology checks, not professional anatomical validation."
+}
