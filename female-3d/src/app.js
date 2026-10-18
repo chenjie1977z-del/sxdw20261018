@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { createTeachingTools } from './teaching.js';
 
 const $=s=>document.querySelector(s);
 const viewport=$('#viewport'),scene=new THREE.Scene();
@@ -14,7 +15,7 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.
 viewport.append(renderer.domElement);
 const ortho=new THREE.OrthographicCamera(-1.05,1.05,1.05,-1.05,.01,30);
 const perspective=new THREE.PerspectiveCamera(35,1,.01,30);
-let camera=ortho,controls,model,materials=[],body;
+let camera=ortho,controls,model,materials=[],body,teaching,annotationActive=false;
 function setupControls(){
  if(controls)controls.dispose();
  controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.09;
@@ -76,6 +77,14 @@ $('#wire').onchange=e=>{for(const m of materials)m.material.wireframe=e.target.c
 function message(text){$('#message').textContent=text;$('#message').style.display='block';clearTimeout(message.timer);message.timer=setTimeout(()=>$('#message').style.display='none',3500);}
 let measuring=false,points=[],measurementObjects=[];
 function clearMeasure(){for(const o of measurementObjects){scene.remove(o);o.geometry.dispose();o.material.dispose();}measurementObjects=[];points=[];$('#measurement').textContent='点击表面选取两点；数值仅属于这个合成模型。';}
+function captureSnapshot(){
+ const size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio();
+ controls.autoRotate=false;$('#rotate').checked=false;
+ const width=4096,height=Math.round(width/size.x*size.y);
+ if(height>renderer.capabilities.maxTextureSize)throw Error('窗口过窄，请放宽窗口后建立标注页。');
+ try{renderer.setPixelRatio(1);renderer.setSize(width,height,false);renderer.render(scene,camera);return {width,height,dataURL:renderer.domElement.toDataURL('image/png')};}
+ finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);}
+}
 $('#measure').onclick=()=>{measuring=!measuring;clearMeasure();$('#measure').classList.toggle('active',measuring);renderer.domElement.style.cursor=measuring?'crosshair':'';message(measuring?'依次点击两个体表位置，计算空间直线距离':'测距已关闭');};
 let down;
 renderer.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
@@ -96,7 +105,7 @@ $('#export').onclick=()=>{
  renderer.domElement.toBlob(blob=>{if(blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='asian-female-3d-4K.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),10000);message('已导出 4096 像素宽截图（不含界面与文字标签）');}else message('导出失败，请重试');},'image/png');
  }catch(error){message(error.message);}finally{renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);button.disabled=false;}
 };
-function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);
+function animate(){requestAnimationFrame(animate);if(annotationActive)return;controls.update();renderer.render(scene,camera);
  for(const {el,marker,normal} of labels){
   if(!landmarkGroup.visible){el.hidden=true;continue;}
   const projected=marker.position.clone().project(camera);const to=camera.position.clone().sub(marker.position).normalize();
@@ -111,6 +120,10 @@ try{
   model=gltf.scene;scene.add(model);let triangles=0;
   model.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.name==='Female_Surface')body=o;triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;for(const m of Array.isArray(o.material)?o.material:[o.material]){if(!materials.some(x=>x.material===m))materials.push({material:m,color:m.color.clone(),map:m.map,roughness:m.roughness});}}});
   $('#loading').style.display='none';$('#status').textContent=`${Math.round(triangles/1000)}k 三角面 · 合成身高 165 cm`;setView('front');
-  window.__viewer={scene,get camera(){return camera;},controls,renderer,model,setView,applyMode,get triangleCount(){return triangles;},ready:true};
+  teaching=createTeachingTools({capture:captureSnapshot,message,getViewName:()=>$('#view-name').textContent,
+   getView:()=>({projection:camera===ortho?'orthographic':'perspective',position:camera.position.toArray(),target:controls.target.toArray(),zoom:camera.zoom}),
+   setActive(active){annotationActive=active;controls.enabled=!active;if(active){controls.autoRotate=false;$('#rotate').checked=false;measuring=false;$('#measure').classList.remove('active');clearMeasure();}}
+  });$('#annotate-view').disabled=false;
+  window.__viewer={scene,get camera(){return camera;},get controls(){return controls;},renderer,model,setView,applyMode,teaching,get triangleCount(){return triangles;},ready:true};
  },error=>{console.error(error);$('#load-text').textContent='模型读取失败，请重新下载完整文件。';});
 }catch(error){console.error(error);$('#load-text').textContent='文件不完整或浏览器内存不足，请重新下载并用桌面版 Chrome / Edge 打开。';}

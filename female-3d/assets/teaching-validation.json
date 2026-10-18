@@ -1,0 +1,55 @@
+{
+  "view_lock": true,
+  "drawing_tools": [
+    "pen",
+    "highlighter",
+    "arrow",
+    "rectangle",
+    "ellipse",
+    "text"
+  ],
+  "undo_redo": true,
+  "move": true,
+  "delete_undo": true,
+  "object_eraser": true,
+  "clear_undo": true,
+  "resize_preserves_coordinates": true,
+  "excalidraw_types": [
+    "image",
+    "freedraw",
+    "freedraw",
+    "arrow",
+    "rectangle",
+    "ellipse",
+    "text"
+  ],
+  "marked_png_pixels": [
+    4096,
+    3218
+  ],
+  "independent_pages": true,
+  "project_merge_restore": true,
+  "invalid_import_preserves_work": true,
+  "page_errors": [],
+  "official_excalidraw_import": {
+    "types": [
+      "image",
+      "freedraw",
+      "freedraw",
+      "arrow",
+      "rectangle",
+      "ellipse",
+      "text"
+    ],
+    "count": 7,
+    "files": 1,
+    "texts": [
+      "教学标注示例"
+    ],
+    "canvas": [
+      1020,
+      805
+    ]
+  },
+  "http_iframe_load": true
+}
