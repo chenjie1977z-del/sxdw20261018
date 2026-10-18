@@ -3,13 +3,16 @@
 Reads CC0 MakeHuman data, not MakeHuman application code. Blender 4.3+.
 """
 from pathlib import Path
-import json, math
+import json, math, sys
 import bpy
 import numpy as np
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'assets/source'
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from surface_detail import sculpt_surface, add_face_and_hair
+from gltf_materials import preserve_iris_factor
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
 
@@ -34,6 +37,15 @@ targets = [('macrodetails/asian-female-young.target', 1.0),
            ('macrodetails/universal-female-young-averagemuscle-maxweight.target', 0.18),
            ('breast/nipple-point-decr.target', 0.70),
            ('breast/nipple-size-decr.target', 0.65),
+           ('breast/female-young-averagemuscle-averageweight-maxcup-averagefirmness.target', 0.32),
+           ('chin/chin-width-decr.target', 0.18),
+           ('chin/chin-bones-decr.target', 0.12),
+           ('chin/chin-jaw-drop-decr.target', 0.48),
+           ('head/head-oval.target', 0.18),
+           ('nose/nose-width3-decr.target', 0.10),
+           ('mouth/mouth-angles-up.target', 0.08),
+           ('armslegs/l-upperleg-muscle-incr.target', 0.26),
+           ('armslegs/r-upperleg-muscle-incr.target', 0.26),
            ('armslegs/l-upperarm-shoulder-muscle-incr.target', 0.10),
            ('armslegs/r-upperarm-shoulder-muscle-incr.target', 0.10),
            ('torso/torso-muscle-dorsi-incr.target', 0.14),
@@ -88,7 +100,8 @@ sub=source_body.modifiers.new('Surface refinement','SUBSURF');sub.levels=2;sub.r
 deps=bpy.context.evaluated_depsgraph_get()
 render_mesh=bpy.data.meshes.new_from_object(source_body.evaluated_get(deps),preserve_all_data_layers=True,depsgraph=deps)
 body=bpy.data.objects.new('Female_Surface',render_mesh);bpy.context.collection.objects.link(body)
-body['clothing']='Opaque vertex-color sportswear on the exact same surface: zero extra clothing thickness or displacement.'
+surface_report=sculpt_surface(body,scale,low)
+body['clothing']='Opaque baked sportswear on the exact same surface: zero extra clothing thickness or displacement.'
 source_body.hide_render=True;source_body.hide_set(True)
 
 # Clothing is a smooth material boundary on the body, not offset geometry.
@@ -146,7 +159,18 @@ bra_node=value_node('MULTIPLY',value_node('MAXIMUM',value_node('ADD',front_node,
 short_node=value_node('MULTIPLY',node_band(py,-2.4,.14),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',2.20,absx),.04)))
 mask_node=value_node('MAXIMUM',bra_node,short_node)
 mix=nodes.new('ShaderNodeMixRGB');mix.blend_type='MIX';links.new(mask_node,mix.inputs[0]);mix.inputs[1].default_value=(*skin_rgb,1);mix.inputs[2].default_value=(*cloth_rgb,1)
-emission=nodes.new('ShaderNodeEmission');links.new(mix.outputs[0],emission.inputs['Color'])
+# Soft natural lip tint, baked continuously rather than flat polygon patches.
+lip_y=value_node('SUBTRACT',py,5.13)
+lip_ellipse=value_node('ADD',value_node('POWER',value_node('DIVIDE',px,.245),2),value_node('POWER',value_node('DIVIDE',lip_y,.065),2))
+lip_mask=value_node('MULTIPLY',node_smooth(value_node('DIVIDE',value_node('SUBTRACT',1,lip_ellipse),.35)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',pz,1.20),.06)))
+lip_mix=nodes.new('ShaderNodeMixRGB');links.new(lip_mask,lip_mix.inputs[0]);links.new(mix.outputs[0],lip_mix.inputs[1]);lip_mix.inputs[2].default_value=(.43,.205,.165,1)
+brow_t=value_node('DIVIDE',value_node('SUBTRACT',absx,.145),.36)
+brow_y=value_node('SUBTRACT',value_node('ADD',5.993,value_node('MULTIPLY',.067,value_node('SINE',value_node('MULTIPLY',math.pi,brow_t)))),value_node('MULTIPLY',.016,brow_t))
+brow_width=value_node('ADD',.009,value_node('MULTIPLY',.014,value_node('SUBTRACT',1,node_smooth(brow_t))))
+brow_shape=node_smooth(value_node('DIVIDE',value_node('SUBTRACT',brow_width,value_node('ABSOLUTE',value_node('SUBTRACT',py,brow_y))),.012))
+brow_mask=value_node('MULTIPLY',value_node('MULTIPLY',brow_shape,node_band(absx,.145,.505,.025)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',pz,1.1),.08)))
+brow_mix=nodes.new('ShaderNodeMixRGB');links.new(value_node('MULTIPLY',.83,brow_mask),brow_mix.inputs[0]);links.new(lip_mix.outputs[0],brow_mix.inputs[1]);brow_mix.inputs[2].default_value=(.055,.031,.021,1)
+emission=nodes.new('ShaderNodeEmission');links.new(brow_mix.outputs[0],emission.inputs['Color'])
 output=nodes.get('Material Output');links.new(emission.outputs[0],output.inputs['Surface'])
 albedo=bpy.data.images.new('Seamless sportswear color 4K',width=4096,height=4096,alpha=False)
 bake_node=nodes.new('ShaderNodeTexImage');bake_node.image=albedo;nodes.active=bake_node
@@ -235,10 +259,17 @@ eye_mat.node_tree.links.new(image.outputs['Color'],nodes.get('Principled BSDF').
 eye_mat.node_tree.links.new(image.outputs['Alpha'],nodes.get('Principled BSDF').inputs['Alpha'])
 eye_mat.surface_render_method='DITHERED'
 eyes=make_mesh('Eyes',eye_v,ef,et,eu,eye_mat)
+# Deep brown iris tint is a material factor; the CC0 eye image stays unchanged.
+iris=material('Deep brown iris',(.2,.4,.3),.34)
+inode=iris.node_tree.nodes.new('ShaderNodeTexImage');inode.image=image.image
+imix=iris.node_tree.nodes.new('ShaderNodeMixRGB');imix.blend_type='MULTIPLY';imix.inputs[0].default_value=1;imix.inputs[2].default_value=(.20,.40,.30,1)
+iris.node_tree.links.new(inode.outputs['Color'],imix.inputs[1]);iris.node_tree.links.new(imix.outputs[0],iris.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
+eyes.data.materials.append(iris)
+for poly,coords in zip(eyes.data.polygons,eu):
+    u=sum(et[i][0] for i in coords)/len(coords);v=sum(et[i][1] for i in coords)/len(coords)
+    if min((u-.274)**2+(v-.297)**2,(u-.703)**2+(v-.707)**2)<.117**2:poly.material_index=1
 
-bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=32,location=(0,.096,1.584))
-bun=bpy.context.object;bun.name='Hair_Bun';bun.scale=(.052,.045,.05);bun.data.materials.append(hair)
-for p in bun.data.polygons:p.use_smooth=True
+detail_report=add_face_and_hair(body,cap,hair,scale,low,make_mesh,material)
 
 # Save editable source with non-destructive subdivision; export evaluated geometry to GLB.
 scene=bpy.context.scene
@@ -250,6 +281,7 @@ bpy.ops.object.select_all(action='DESELECT')
 for ob in scene.objects:
     if ob.type=='MESH' and ob!=source_body:ob.select_set(True)
 bpy.ops.export_scene.gltf(filepath=str(ROOT/'assets/asian-female.glb'),export_format='GLB',use_selection=True,export_apply=True,export_vertex_color='NONE',export_tangents=True,export_cameras=False,export_lights=False,export_extras=True)
+preserve_iris_factor(ROOT/'assets/asian-female.glb')
 
 # Inspect the evaluated body rather than claiming subdivision created new anatomical information.
 deps=bpy.context.evaluated_depsgraph_get();evaluated=body.evaluated_get(deps);mesh=evaluated.to_mesh()
@@ -259,12 +291,20 @@ for poly in source_body.data.polygons:
     ids=list(poly.vertices)
     for a,b in zip(ids,ids[1:]+ids[:1]):
         key=tuple(sorted([a,b]));edge_counts[key]=edge_counts.get(key,0)+1
-report={'revision':3,'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
+report={'revision':4,'adult_age_range_years':[20,25],'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
         'evaluated_body_vertices':len(mesh.vertices),'evaluated_body_triangles':len(mesh.loop_triangles),
         'boundary_edges':sum(v==1 for v in edge_counts.values()),'nonmanifold_edges':sum(v>2 for v in edge_counts.values()),
         'targets':[{'file':n,'weight':w} for n,w in targets],
+        'authored_surface_detail':surface_report,'face_and_hair':detail_report,
         'clothing_method':'Analytical garment coverage baked to 4K albedo on the exact body surface; no separate garment mesh.',
         'garment_offset_m':0,'garment_thickness_m':0,'micro_normal_pixels':[4096,4096],'albedo_pixels':[4096,4096],
         'scope':'External surface only; mathematical topology checks, not professional anatomical validation.'}
+report['rendered_meshes']=[]
+for ob in scene.objects:
+    if ob.type!='MESH' or ob==source_body:continue
+    evaluated_mesh=ob.evaluated_get(deps).to_mesh();evaluated_mesh.calc_loop_triangles()
+    report['rendered_meshes'].append({'name':ob.name,'triangles':len(evaluated_mesh.loop_triangles)})
+    ob.evaluated_get(deps).to_mesh_clear()
+report['total_rendered_triangles']=sum(m['triangles'] for m in report['rendered_meshes'])
 (ROOT/'assets/model-report.json').write_text(json.dumps(report,indent=2)+'\n')
 print('MODEL_REPORT',json.dumps(report))

@@ -1,7 +1,20 @@
 {
   "loaded": true,
-  "triangles": 457624,
+  "triangles": 498808,
   "presets": true,
+  "detail_meshes": [
+    "Female_Surface",
+    "Eyes_1",
+    "Eyes_2",
+    "Hair_Cap",
+    "Hair_Ponytail",
+    "Hair_Wispy_Bangs",
+    "Hair_Fine_Strokes",
+    "Eyebrows",
+    "Upper_Eyelashes",
+    "Lower_Eyelashes"
+  ],
+  "closeup_perspective_directions": true,
   "drag_rotation": true,
   "wheel_zoom": true,
   "pan": true,

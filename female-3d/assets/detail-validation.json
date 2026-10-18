@@ -1,0 +1,54 @@
+{
+  "revision": 4,
+  "glb_sha256": "a633a38077c309a137a6016ef7416f2fc0571b3a3c8d683698ef48374439e58c",
+  "meshes": [
+    "Female_Surface.001",
+    "Eyes",
+    "Continuous scalp",
+    "Hair_Ponytail",
+    "Hair_Wispy_Bangs",
+    "Hair_Fine_Strokes",
+    "Eyebrows",
+    "Upper_Eyelashes",
+    "Lower_Eyelashes"
+  ],
+  "mesh_nodes": [
+    "Female_Surface",
+    "Eyes",
+    "Hair_Cap",
+    "Hair_Ponytail",
+    "Hair_Wispy_Bangs",
+    "Hair_Fine_Strokes",
+    "Eyebrows",
+    "Upper_Eyelashes",
+    "Lower_Eyelashes"
+  ],
+  "source_asset_hashes_checked": 22,
+  "iris_factor": [
+    0.2,
+    0.4,
+    0.3
+  ],
+  "materials": {
+    "albedo": [
+      4096,
+      4096
+    ],
+    "normal": [
+      4096,
+      4096
+    ]
+  },
+  "clay_skin_map_restoration": true,
+  "excalidraw_types": [
+    "image",
+    "arrow",
+    "text"
+  ],
+  "marked_export_pixels": [
+    4096,
+    3218
+  ],
+  "teaching_annotation_and_return": true,
+  "page_errors": []
+}

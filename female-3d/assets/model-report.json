@@ -1,5 +1,9 @@
 {
-  "revision": 3,
+  "revision": 4,
+  "adult_age_range_years": [
+    20,
+    25
+  ],
   "body_height_m": 1.65,
   "height_is_synthetic": true,
   "base_vertices": 13380,
@@ -30,6 +34,42 @@
       "weight": 0.65
     },
     {
+      "file": "breast/female-young-averagemuscle-averageweight-maxcup-averagefirmness.target",
+      "weight": 0.32
+    },
+    {
+      "file": "chin/chin-width-decr.target",
+      "weight": 0.18
+    },
+    {
+      "file": "chin/chin-bones-decr.target",
+      "weight": 0.12
+    },
+    {
+      "file": "chin/chin-jaw-drop-decr.target",
+      "weight": 0.48
+    },
+    {
+      "file": "head/head-oval.target",
+      "weight": 0.18
+    },
+    {
+      "file": "nose/nose-width3-decr.target",
+      "weight": 0.1
+    },
+    {
+      "file": "mouth/mouth-angles-up.target",
+      "weight": 0.08
+    },
+    {
+      "file": "armslegs/l-upperleg-muscle-incr.target",
+      "weight": 0.26
+    },
+    {
+      "file": "armslegs/r-upperleg-muscle-incr.target",
+      "weight": 0.26
+    },
+    {
       "file": "armslegs/l-upperarm-shoulder-muscle-incr.target",
       "weight": 0.1
     },
@@ -46,6 +86,31 @@
       "weight": 0.08
     }
   ],
+  "authored_surface_detail": {
+    "method": "Smooth analytic displacement of refined continuous body mesh",
+    "regions": [
+      "clavicles",
+      "supraclavicular fossae",
+      "infraclavicular fossae",
+      "sternocleidomastoid relief",
+      "scapular spine and medial border relief",
+      "lumbar dimples",
+      "quadriceps relief"
+    ],
+    "max_absolute_displacement_m": 0.003671986749395728,
+    "professionally_validated": false
+  },
+  "face_and_hair": {
+    "hairstyle": "High ponytail with nine separated wispy bang locks and fine cap strokes",
+    "eyebrows": "420 fine body-fitted tapered hairs over a soft baked brow tint",
+    "eyelashes": {
+      "upper": 54,
+      "lower": 28
+    },
+    "attachment": "Ray cast to refined adult body surface",
+    "age": "adult, 20\u201325 years",
+    "not_a_real_person": true
+  },
   "clothing_method": "Analytical garment coverage baked to 4K albedo on the exact body surface; no separate garment mesh.",
   "garment_offset_m": 0,
   "garment_thickness_m": 0,
@@ -57,5 +122,44 @@
     4096,
     4096
   ],
-  "scope": "External surface only; mathematical topology checks, not professional anatomical validation."
+  "scope": "External surface only; mathematical topology checks, not professional anatomical validation.",
+  "rendered_meshes": [
+    {
+      "name": "Female_Surface",
+      "triangles": 428096
+    },
+    {
+      "name": "Eyes",
+      "triangles": 2040
+    },
+    {
+      "name": "Hair_Cap",
+      "triangles": 11998
+    },
+    {
+      "name": "Hair_Ponytail",
+      "triangles": 13570
+    },
+    {
+      "name": "Hair_Wispy_Bangs",
+      "triangles": 10080
+    },
+    {
+      "name": "Hair_Fine_Strokes",
+      "triangles": 8840
+    },
+    {
+      "name": "Eyebrows",
+      "triangles": 19320
+    },
+    {
+      "name": "Upper_Eyelashes",
+      "triangles": 3856
+    },
+    {
+      "name": "Lower_Eyelashes",
+      "triangles": 1008
+    }
+  ],
+  "total_rendered_triangles": 498808
 }

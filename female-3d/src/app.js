@@ -52,10 +52,13 @@ function resize(){
 new ResizeObserver(resize).observe(viewport);resize();
 const views={front:{p:[0,.85,3.4],t:[0,.85,0],n:'正面观察'},back:{p:[0,.85,-3.4],t:[0,.85,0],n:'背面观察'},
  left:{p:[3.4,.85,0],t:[0,.85,0],n:'左侧观察'},right:{p:[-3.4,.85,0],t:[0,.85,0],n:'右侧观察'},
- shoulder:{p:[.48,1.45,-1.1],t:[0,1.29,0],z:3.0,n:'肩背局部观察'}};
+ shoulder:{p:[.48,1.45,-1.1],t:[0,1.29,0],z:3.0,n:'肩背局部观察'},
+ face:{p:[0,1.54,1.1],t:[0,1.54,0],z:6.5,n:'面部与发丝观察'},
+ neck:{p:[.18,1.40,1.4],t:[0,1.36,0],z:4.2,n:'锁骨与颈部观察'},
+ thighs:{p:[.15,.63,1.8],t:[0,.63,.04],z:2.8,n:'大腿与膝部观察'}};
 function setView(name){
  const v=views[name];camera.position.set(...v.p);controls.target.set(...v.t);ortho.zoom=v.z||1;ortho.updateProjectionMatrix();
- if(camera===perspective&&v.z)camera.position.copy(controls.target).add(new THREE.Vector3(.48,.16,-1.1).normalize().multiplyScalar(.7));
+ if(camera===perspective&&v.z)camera.position.copy(controls.target).add(new THREE.Vector3(...v.p).sub(new THREE.Vector3(...v.t)).normalize().multiplyScalar(name==='face'?.38:name==='neck'?.65:.85));
  controls.update();$('#view-name').textContent=v.n;
  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
 }

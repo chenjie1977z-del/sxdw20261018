@@ -10,6 +10,8 @@ Included: hm08 base mesh, Asian adult female macro target, universal female targ
 
 Revision 03 also uses the same upstream CC0 fuller-body, shoulder, and covered chest-detail reduction targets listed in the provenance manifest. The 4K sportswear albedo bake and procedural micro-normal texture are original project output, not third-party skin scans.
 
+Revision 04 adds same-source CC0 adult breast-volume, jaw, face-shape, nose, mouth-corner and thigh-muscle targets. The ponytail, separated bangs, eyebrow/lash meshes, soft facial tint and approximate external surface relief are original project additions under the project MIT license. Source asset bytes and hashes are preserved in the provenance manifest.
+
 The upstream `LICENSE.md` sections C and D distinguish CC0 graphical assets and output from AGPL application code. This project redistributes the CC0 data and uses an original independent Blender build script. It does not bundle the MakeHuman application or its program logic. See `licenses/MAKEHUMAN-LICENSE.md` and `licenses/CC0-1.0.txt` for the preserved upstream text.
 
 Upstream asset credits include the MakeHuman Team, Manuel Bastioni, Data Collection AB, Joel Palmius and Jonas Hauquier as listed in the individual source headers. Attribution is provided for provenance; CC0 does not require it.

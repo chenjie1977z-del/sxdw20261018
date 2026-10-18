@@ -17,8 +17,8 @@
         599.9988
       ],
       "resampled": true,
-      "sha256": "648c939117dd5676b05c4b2e195d753d36667429c43fcb291613fad3de8daeb4",
-      "bytes": 24447416
+      "sha256": "814efaaa3425adc65ae0ccb271357982825b3e79c2c41a58f3f69aa518276985",
+      "bytes": 24477811
     },
     {
       "file": "A3-600dpi/female-three-views-A3-600dpi.png",
@@ -31,8 +31,8 @@
         599.9988
       ],
       "resampled": true,
-      "sha256": "f529b76b358f7069d102b6e1259a3fd2636419fac3d3b850f42cf5d0e89cd1eb",
-      "bytes": 21954640
+      "sha256": "667de8bc2d677e37f95131d13429cfc489da425b511a6b0b93afbcf171ce93f2",
+      "bytes": 25621229
     },
     {
       "file": "A3-600dpi/female-upper-detail-A3-600dpi.png",
@@ -45,8 +45,8 @@
         599.9988
       ],
       "resampled": true,
-      "sha256": "cb8bd68d4d8e5dc5feeaf4693f1c707aeb929aa8e4352a42909805d392be3021",
-      "bytes": 22392543
+      "sha256": "a586cde78f4c03e2bbfa6282e0a4f97432c6527fdf1d5281cb8e9773a2ce5180",
+      "bytes": 25127755
     },
     {
       "file": "A3-600dpi/male-lower-detail-A3-600dpi.png",
@@ -59,8 +59,8 @@
         599.9988
       ],
       "resampled": true,
-      "sha256": "b50e601f007840e1d192ecd4a9f87e40c53c473bf6dd3e9fa2561fde3829fe62",
-      "bytes": 23909163
+      "sha256": "ff30d39e9870fe4e4aab08c09c3beeef93982b4d2d9f8fc410e7a3a739974215",
+      "bytes": 26669975
     },
     {
       "file": "A3-600dpi/male-three-views-A3-600dpi.png",
@@ -73,8 +73,8 @@
         599.9988
       ],
       "resampled": true,
-      "sha256": "fbf6a2c10c76e2ff628f2b5d0d9c931238723d8cdda51b389a8c46bfb4aac3ce",
-      "bytes": 25210262
+      "sha256": "9e18b9fdb6c10192799bf95af3305b574b91afaeb5df46a4bb5c34266c1e4b89",
+      "bytes": 27461697
     },
     {
       "file": "A3-600dpi/male-upper-detail-A3-600dpi.png",
@@ -87,8 +87,8 @@
         599.9988
       ],
       "resampled": true,
-      "sha256": "46fd231d7791ab5736df0259c84d7425717903cf780dcf0990be423d905f9a94",
-      "bytes": 22801738
+      "sha256": "49d6437729a6ad4bf51f7c1dd86d85eb2631443661c5886d50f0d8580d642f92",
+      "bytes": 28875456
     },
     {
       "file": "native/female-lower-detail-native-600dpi.tif",
@@ -101,8 +101,8 @@
         600.0
       ],
       "resampled": false,
-      "sha256": "c19c94c2db80429e304e0e07d62ec77b90232a1ffc244d674261405571234b29",
-      "bytes": 1600158,
+      "sha256": "dc0318f5b8bee92e3a8ce067807e055f6c4800c1d5f3371bfce6972d0d00f2ad",
+      "bytes": 1621510,
       "native_print_mm_at_600": [
         65.02,
         43.35
@@ -119,8 +119,8 @@
         600.0
       ],
       "resampled": false,
-      "sha256": "d99e05ad704913cc6e3e821c6742c4013ed4745f73b814ca073004a5f54a6bec",
-      "bytes": 3834794,
+      "sha256": "25f6e9b0e8d4a8c06113d85603f47f8c66c5b190066e6e41b4245ca0fcfcac4a",
+      "bytes": 4409738,
       "native_print_mm_at_600": [
         130.05,
         68.41
@@ -129,19 +129,19 @@
     {
       "file": "native/female-upper-detail-native-600dpi.tif",
       "pixels": [
-        1790,
-        878
+        1659,
+        948
       ],
       "dpi": [
         600.0,
         600.0
       ],
       "resampled": false,
-      "sha256": "bed4bcca8a94621110b164809ed6a3281a0c446af3dc44818540f78367aef393",
-      "bytes": 1957178,
+      "sha256": "09a36982ae0f46dc7768249bc3bf5a9cfc85c4ab2e1fdf13d1c9be72fcaec120",
+      "bytes": 1954626,
       "native_print_mm_at_600": [
-        75.78,
-        37.17
+        70.23,
+        40.13
       ]
     },
     {
@@ -155,8 +155,8 @@
         600.0
       ],
       "resampled": false,
-      "sha256": "8c9e7db8d773c0dae936e2d516e09d54c7622ebc1bafb16960b58ece98d52c3f",
-      "bytes": 1602926,
+      "sha256": "8ef10eb10ea0ef6cc97c555bb1f475b77daceb06a1771259ad214b7825e1709c",
+      "bytes": 1771072,
       "native_print_mm_at_600": [
         65.02,
         43.35
@@ -173,8 +173,8 @@
         600.0
       ],
       "resampled": false,
-      "sha256": "2b54f1c04c7354f77ae8bfb3ad3de079a27aa985a41c9fb6afeea10d0917ce28",
-      "bytes": 4406048,
+      "sha256": "5148887d0ad2295728723da2603ecdce9257d5abcef5b08f354c7a5fc8bd9c8f",
+      "bytes": 4719228,
       "native_print_mm_at_600": [
         130.05,
         68.41
@@ -183,19 +183,19 @@
     {
       "file": "native/male-upper-detail-native-600dpi.tif",
       "pixels": [
-        1774,
-        887
+        1659,
+        948
       ],
       "dpi": [
         600.0,
         600.0
       ],
       "resampled": false,
-      "sha256": "8e228f72ecf6301544956b7acdd1538bf5332cfcb5fce9c5068b064241fe1695",
-      "bytes": 1947736,
+      "sha256": "5d2746098b032b4b15c6c6fa8c1a76fb7c3ddd38c0827c0aa53710b6f8f56990",
+      "bytes": 2307372,
       "native_print_mm_at_600": [
-        75.1,
-        37.55
+        70.23,
+        40.13
       ]
     }
   ]

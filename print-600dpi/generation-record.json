@@ -1,39 +1,35 @@
 [
   {
-    "file": "sources/female-front.png",
-    "native_pixels": [
-      1024,
-      1536
-    ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
-  },
-  {
-    "file": "sources/female-side.png",
-    "native_pixels": [
-      1024,
-      1536
-    ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
-  },
-  {
     "file": "sources/female-back.png",
     "native_pixels": [
       1024,
       1536
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "b71ad471dc40201b157339e5e8afc6a43f145e728e57ff7e6b48a7d642f5f08d"
   },
   {
-    "file": "sources/female-upper-detail.png",
+    "file": "sources/female-front.png",
     "native_pixels": [
-      1790,
-      878
+      1024,
+      1536
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "a6ed835b197a6edf8123e760a1308ea1f3b5a75558225a89f77367c185f8af54"
   },
   {
     "file": "sources/female-lower-detail.png",
@@ -41,26 +37,48 @@
       1536,
       1024
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "525044852ed06ce68909a71ba5c35a82ccda49e4896df388dc6dfcadec5b9746"
   },
   {
-    "file": "sources/male-front.png",
+    "file": "sources/female-side.png",
     "native_pixels": [
       1024,
       1536
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "a9799f0a0ac8481396550a1529db828eaa9280e8de08d37565a2ca5433732dfc"
   },
   {
-    "file": "sources/male-side.png",
+    "file": "sources/female-upper-detail.png",
     "native_pixels": [
-      1024,
-      1536
+      1659,
+      948
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "17f6d2131ea541c08973fc2be1ec1e3248e3ca7e1d9501440146046ee4d11809",
+    "framing": "Anterior/lateral face, neck and clavicles; anterior chest outside frame; separate posterior shoulder study."
   },
   {
     "file": "sources/male-back.png",
@@ -68,17 +86,31 @@
       1024,
       1536
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "41b1027d0f453c2a08644ef85388484307f3c858abccf80e22c8d8a21972503b"
   },
   {
-    "file": "sources/male-upper-detail.png",
+    "file": "sources/male-front.png",
     "native_pixels": [
-      1774,
-      887
+      1024,
+      1536
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "a8139fd6b453e256f20f6f43379b8d9d17a69b42ae45b278407112f475fc42fe"
   },
   {
     "file": "sources/male-lower-detail.png",
@@ -86,7 +118,46 @@
       1536,
       1024
     ],
-    "method": "New reference-guided regional or single-view generation; no upsampling.",
-    "reference_git_commit": "1cb9ef5"
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "88f532f38417f57dca1817b92d7ef39834c0ba572e0cd931040cb10c27651b3c"
+  },
+  {
+    "file": "sources/male-side.png",
+    "native_pixels": [
+      1024,
+      1536
+    ],
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "0f8e1794a84dbe299488e925f17472d209a71b7c59926ca2d8dceceb6d3ac16f"
+  },
+  {
+    "file": "sources/male-upper-detail.png",
+    "native_pixels": [
+      1659,
+      948
+    ],
+    "method": "Reference-guided adult medical illustration editing; native generated output, no upsampling.",
+    "reference_git_commit": "eaa3d4c",
+    "adult_age_range_years": [
+      20,
+      25
+    ],
+    "subject_age_years": 23,
+    "generated_on": "2026-10-18",
+    "sha256": "61ca03a3bbaca181dfa90c024394bc5c0c0a060d5b37458c95a84d7181fbe355"
   }
 ]
