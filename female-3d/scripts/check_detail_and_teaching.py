@@ -1,4 +1,4 @@
-"""Revision 4 model/material/teaching integration. Serve this folder on :8077."""
+"""Current model/material/teaching integration. Serve this folder on :8088."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from PIL import Image
@@ -7,11 +7,11 @@ import hashlib,json,struct
 ROOT=Path(__file__).resolve().parents[1]
 binary=(ROOT/'assets/asian-female.glb').read_bytes()
 length=struct.unpack_from('<I',binary,12)[0];gltf=json.loads(binary[20:20+length])
-report={'revision':4,'glb_sha256':hashlib.sha256(binary).hexdigest()}
+report={'revision':json.loads((ROOT/'assets/model-report.json').read_text())['revision'],'glb_sha256':hashlib.sha256(binary).hexdigest()}
 report['meshes']=[m['name'] for m in gltf['meshes']]
 report['mesh_nodes']=[n['name'] for n in gltf['nodes'] if 'mesh' in n]
-assert len(report['meshes'])==9
-assert 'Hair_Bun' not in report['meshes']
+assert len(report['meshes'])==len(json.loads((ROOT/'assets/model-report.json').read_text())['rendered_meshes'])
+assert not any(n in report['meshes'] for n in ['Hair_Bun','Hair_Ponytail','Hair_Wispy_Bangs'])
 assert all(not any(k in m['name'] for k in ['Bra','Shorts','Straps']) for m in gltf['meshes'])
 surface=gltf['meshes'][next(n['mesh'] for n in gltf['nodes'] if n['name']=='Female_Surface')]
 assert all('TANGENT' in p['attributes'] for p in surface['primitives'])
@@ -24,10 +24,10 @@ with sync_playwright() as p:
     browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader'])
     page=browser.new_page(viewport={'width':1500,'height':1050},accept_downloads=True)
     page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto('http://127.0.0.1:8077/female-3d.html');page.wait_for_function('window.__viewer?.ready',timeout=60000)
+    page.goto('http://127.0.0.1:8088/female-3d.html');page.wait_for_function('window.__viewer?.ready',timeout=60000)
     report['iris_factor']=page.evaluate('window.__viewer.model.getObjectByName("Eyes_2").material.color.toArray()')
     assert all(abs(a-b)<1e-6 for a,b in zip(report['iris_factor'],[.2,.4,.3]))
-    page.locator('[data-view="face"]').click();page.screenshot(path=str(ROOT/'previews/v4-face.png'))
+    page.locator('[data-view="face"]').click();page.screenshot(path=str(ROOT/'previews/v5-face.png'))
     report['materials']=page.evaluate('''()=>{let m;window.__viewer.model.traverse(o=>{if(o.name==='Female_Surface')m=o.material});window.surfaceMaterial=m;window.originalMaps={map:m.map,normalMap:m.normalMap};return {albedo:[m.map.image.width,m.map.image.height],normal:[m.normalMap.image.width,m.normalMap.image.height]}}''')
     assert report['materials']=={'albedo':[4096,4096],'normal':[4096,4096]}
     page.locator('[data-mode="clay"]').click()

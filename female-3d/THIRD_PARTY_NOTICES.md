@@ -27,3 +27,9 @@ esbuild 0.25.10 is used for bundling and is not required at runtime. Its depende
 ## Original additions
 
 Original viewer code, build scripts, garment construction, hair additions and project documentation are released under the MIT license in `licenses/PROJECT-MIT.txt`. MakeHuman-derived asset data remains available under its CC0 dedication. No publisher's textbook images, proprietary anatomical models or scanned individual likenesses are included.
+
+## Revision 05 additions
+
+Same-source CC0 upper-lip and umbilicus morphs were added; hashes and exact source paths are in the provenance manifest. Procedural shallow body folds, revised hairline and the surface-annotation tools are original MIT-licensed project additions.
+
+three-mesh-bvh 0.9.2 is bundled for local surface picking and projection. Copyright © Garrett Johnson and contributors, MIT. Full license: `licenses/THREE-MESH-BVH-MIT.txt`. No network service is required at runtime.

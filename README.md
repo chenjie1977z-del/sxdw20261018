@@ -6,9 +6,9 @@
 
 已提供亚洲成年女性体表的真实三维网格与离线查看器，可旋转、缩放、平移、切换标准视角、聚焦肩背、查看线框、测量两点直线距离，并导出 4K PNG。
 
-**优化版 04**：继续增加自然胸部体积，改为马尾与疏朗刘海，细化眉毛、睫毛和唇色，并加入锁骨、颈部、肩背、腰部和大腿的轻柔曲面起伏。新增面部、锁骨颈部、大腿膝部快捷观察视角。详见 [面部](female-3d/previews/v4-face.png)、[锁骨与颈部](female-3d/previews/v4-neck.png)、[肩背](female-3d/previews/v4-shoulder.png)和[本版说明](female-3d/优化版04说明.md)。
+**优化版 05**：新增随旋转保留的三维表面标注，支持可拖动的文字、端点与描线、可调弧度的两点连线、等分刻度、大小调整、撤销重做及三维课件保存恢复。背景可切换暖白与两档暗灰；模型取消刘海和马尾，调整轻微微笑与体表浅纹。[使用说明与功能边界](female-3d/三维标注与优化版05.md)。
 
-现已加入**教学标注**：画笔、荧光笔、箭头、形状、文字、移动、擦除、撤销重做、多页课件，以及可编辑 `.excalidraw` 导出。先选定三维视角再标注；笔迹绑定视角快照，不随三维模型旋转。
+同时保留**二维截图板书**：画笔、荧光笔、箭头、形状、文字、移动、擦除、撤销重做、多页课件，以及可编辑 `.excalidraw` 导出。这套二维笔迹绑定视角快照；三维锚定标注请使用查看器上方的新工具，两类课件分别保存。
 
 - [教学版预览](female-3d/previews/teaching-viewer.png) · [可编辑示例](female-3d/previews/teaching-demo.excalidraw)
 - [Obsidian / Excalidraw 使用教程](female-3d/Obsidian与Excalidraw教学.md) · [Obsidian 网页嵌入示例](female-3d/obsidian-live-embed.excalidraw)
@@ -21,9 +21,9 @@
 - [正面预览](female-3d/previews/viewer-front.png) · [背面预览](female-3d/previews/viewer-back.png) · [肩背局部](female-3d/previews/viewer-shoulder.png)
 - [来源与许可](female-3d/THIRD_PARTY_NOTICES.md) · [验证范围](female-3d/VALIDATION.md)
 
-[![女性 3D 优化版 04 正面预览](female-3d/previews/v4-front.png)](female-3d/优化版04说明.md)
+[![三维表面锚定标注与暗色背景预览](female-3d/previews/v5-anchors-slate.png)](female-3d/三维标注与优化版05.md)
 
-[![女性 3D 面部与发丝局部预览](female-3d/previews/v4-face.png)](female-3d/previews/v4-face.png)
+[![女性 3D 面容与发际线预览](female-3d/previews/v5-face.png)](female-3d/previews/v5-face.png)
 
 本版是体表概念样稿，不含内部骨骼，尚未经专业解剖校核；体表细分网格的平滑度不等于医学细节准确性。
 

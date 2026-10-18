@@ -43,7 +43,10 @@ targets = [('macrodetails/asian-female-young.target', 1.0),
            ('chin/chin-jaw-drop-decr.target', 0.48),
            ('head/head-oval.target', 0.18),
            ('nose/nose-width3-decr.target', 0.10),
-           ('mouth/mouth-angles-up.target', 0.08),
+           ('mouth/mouth-angles-up.target', 0.16),
+           ('mouth/mouth-upperlip-height-incr.target', 0.22),
+           ('mouth/mouth-upperlip-volume-incr.target', 0.22),
+           ('stomach/stomach-navel-in.target', 0.30),
            ('armslegs/l-upperleg-muscle-incr.target', 0.26),
            ('armslegs/r-upperleg-muscle-incr.target', 0.26),
            ('armslegs/l-upperarm-shoulder-muscle-incr.target', 0.10),
@@ -160,8 +163,9 @@ short_node=value_node('MULTIPLY',node_band(py,-2.4,.14),node_smooth(value_node('
 mask_node=value_node('MAXIMUM',bra_node,short_node)
 mix=nodes.new('ShaderNodeMixRGB');mix.blend_type='MIX';links.new(mask_node,mix.inputs[0]);mix.inputs[1].default_value=(*skin_rgb,1);mix.inputs[2].default_value=(*cloth_rgb,1)
 # Soft natural lip tint, baked continuously rather than flat polygon patches.
-lip_y=value_node('SUBTRACT',py,5.13)
-lip_ellipse=value_node('ADD',value_node('POWER',value_node('DIVIDE',px,.245),2),value_node('POWER',value_node('DIVIDE',lip_y,.065),2))
+lip_curve=value_node('ADD',5.16,value_node('MULTIPLY',.25,value_node('POWER',px,2)))
+lip_y=value_node('SUBTRACT',py,lip_curve)
+lip_ellipse=value_node('ADD',value_node('POWER',value_node('DIVIDE',px,.255),2),value_node('POWER',value_node('DIVIDE',lip_y,.095),2))
 lip_mask=value_node('MULTIPLY',node_smooth(value_node('DIVIDE',value_node('SUBTRACT',1,lip_ellipse),.35)),node_smooth(value_node('DIVIDE',value_node('SUBTRACT',pz,1.20),.06)))
 lip_mix=nodes.new('ShaderNodeMixRGB');links.new(lip_mask,lip_mix.inputs[0]);links.new(mix.outputs[0],lip_mix.inputs[1]);lip_mix.inputs[2].default_value=(.43,.205,.165,1)
 brow_t=value_node('DIVIDE',value_node('SUBTRACT',absx,.145),.36)
@@ -291,7 +295,7 @@ for poly in source_body.data.polygons:
     ids=list(poly.vertices)
     for a,b in zip(ids,ids[1:]+ids[:1]):
         key=tuple(sorted([a,b]));edge_counts[key]=edge_counts.get(key,0)+1
-report={'revision':4,'adult_age_range_years':[20,25],'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
+report={'revision':5,'adult_age_range_years':[20,25],'body_height_m':1.65,'height_is_synthetic':True,'base_vertices':len(source_body.data.vertices),'base_faces':len(source_body.data.polygons),
         'evaluated_body_vertices':len(mesh.vertices),'evaluated_body_triangles':len(mesh.loop_triangles),
         'boundary_edges':sum(v==1 for v in edge_counts.values()),'nonmanifold_edges':sum(v>2 for v in edge_counts.values()),
         'targets':[{'file':n,'weight':w} for n,w in targets],

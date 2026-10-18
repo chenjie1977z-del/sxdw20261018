@@ -46,16 +46,30 @@ def sculpt_surface(body, scale, low):
     # Paired shallow lumbar dimples and subtle paraspinal transition.
     posterior-=.032*g(a-.49,.14)*g(y-.10,.17)
     posterior+=.013*g(a-.20,.14)*g(y-1.45,.66)
+    # Shallow normal skin folds, authored for this neutral A-pose only.
+    radius=np.sqrt((x/.085)**2+((y-1.01)/.105)**2)
+    anterior+=.004*g(radius-1,.30)*g(z-1.32,.28)
+    anterior-=.014*g(x,.050)*g(y-1.01,.070)*g(z-1.32,.28)
+    anterior+=.012*g(a-1.25,.20)*g(y+4.25,.25)
+    anterior-=.005*g(y+4.05+.13*(a-1.25)**2,.025)*g(a-1.25,.36)
+    posterior-=.012*g(y+4.27-.10*(a-1.25)**2,.035)*g(a-1.25,.40)
+    axilla_y=3.10+.72*(a-1.42)
+    anterior-=.006*g(y-axilla_y,.036)*g(a-1.53,.15)*g(z-.60,.30)
     displacement=(-anterior*front+posterior*back)*scale
     positions[:,1]+=displacement
     # Relax the neutral open-mouth rest pose toward a narrow natural lip seam.
     lip_gate=g(x,.33)**4*np.exp(-((y-5.13)/.22)**4)*smooth((z-1.05)/.15)
-    lip_lift=-.035*np.tanh((y-5.13)/.04)*lip_gate*scale
+    lip_lift=(-.038*np.tanh((y-5.13)/.05)*lip_gate+.008*g(a-.21,.075)*g(y-5.17,.13)*smooth((z-1.10)/.15))*scale
     positions[:,2]+=lip_lift
+    # Palmar wrist creases are shallow surface depressions, never dark ink lines.
+    wrist_t=(a-3.92)*.57-(y-.93)*.69+(z-1.50)*.45
+    wrist_gate=g(a-3.92,.28)*g(y-.93,.30)*g(z-1.39,.24)*smooth((1.50-z)/.10)
+    wrist_depth=(.007*g(wrist_t,.022)+.0045*g(wrist_t-.065,.020))*wrist_gate*scale
+    normals=np.empty_like(positions);mesh.vertices.foreach_get('normal',normals.reshape(-1));positions-=normals*wrist_depth[:,None]
     mesh.vertices.foreach_set('co',positions.reshape(-1));mesh.update()
     body['surface_detail']='Authored gentle clavicular, SCM, scapular, lumbar and quadriceps surface relief; not clinical calibration.'
     return {'method':'Smooth analytic displacement of refined continuous body mesh',
-            'regions':['clavicles','supraclavicular fossae','infraclavicular fossae','sternocleidomastoid relief','scapular spine and medial border relief','lumbar dimples','quadriceps relief'],
+            'regions':['clavicles','supraclavicular fossae','infraclavicular fossae','sternocleidomastoid relief','scapular spine and medial border relief','lumbar dimples','quadriceps relief','umbilicus','patellar contour','popliteal crease','palmar wrist creases','anterior axillary fold'],
             'max_absolute_displacement_m':float(np.max(np.hypot(displacement,lip_lift))),
             'professionally_validated':False}
 
@@ -98,12 +112,12 @@ def add_face_and_hair(body, cap, hair, scale, low, make_mesh, material):
     for j in range(columns):
         angle=2*math.pi*j/columns
         c=math.cos(angle)
-        hairline_y=5.78+(.42 if c>=0 else .30)*c
+        hairline_y=5.80+(.46 if c>=0 else .32)*c+.035*math.cos(2*angle)
         def scalp_at(phi):
             direction=Vector((math.sin(phi)*math.sin(angle),-math.sin(phi)*math.cos(angle),math.cos(phi)))
             hit,normal,_,_=bvh.ray_cast(origin,direction,1)
             if hit is None:raise ValueError('Scalp ray missed')
-            return hit+normal*.0038
+            return hit+normal*.0022
         lo_phi=.01;hi_phi=2.7
         for _ in range(19):
             mid=(lo_phi+hi_phi)/2
@@ -119,42 +133,14 @@ def add_face_and_hair(body, cap, hair, scale, low, make_mesh, material):
     import bpy
     bpy.data.objects.remove(cap,do_unlink=True);new_cap.name='Hair_Cap'
     hair.node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.64
-    # A ponytail made of overlapping tapered locks, directed away from the back.
-    pony=Strands()
-    for j in range(23):
-        angle=j*2.399963
-        radial=.18*math.sqrt((j+.5)/23)
-        pts=[];radii=[]
-        for t in np.linspace(0,1,33):
-            cx=.07*math.sin(t*math.pi)
-            cy=6.26-(1.50+.10*math.sin(j*1.8))*t+.26*math.sin(math.pi*t)
-            cz=-.60-.91*math.sin(math.pi*t*.64)
-            spread=.42+.65*math.sin(math.pi*t*.92)
-            pts.append(point(cx+radial*math.cos(angle)*spread,cy,cz+radial*math.sin(angle)*spread))
-            radii.append(scale*(.074*(1-t)**.50+.003))
-        pony.add(pts,radii,9)
-    pony.mesh('Hair_Ponytail',make_mesh,hair)
-    # Wispy locks are individually separated; their tips do not form a solid fringe.
-    bangs=Strands()
-    for j,xend in enumerate([-.47,-.36,-.24,-.12,.035,.16,.285,.41,.50]):
-        for strand in range(5):
-            pts=[];radii=[]
-            tip_y=6.015+.075*math.sin(j*2.1)+.014*math.sin(strand*2)
-            for t in np.linspace(0,1,19):
-                x=xend*(.54+.46*t)+.025*math.sin(math.pi*t+j)+(strand-2)*.009
-                y=6.42+(tip_y-6.42)*t
-                pts.append(skin_point(x,y,.0044+.0018*math.sin(math.pi*t)))
-                radii.append(scale*(.0045*(1-t)**.6+.00025))
-            bangs.add(pts,radii,6)
-    bangs.mesh('Hair_Wispy_Bangs',make_mesh,hair)
-    # Fine brushed strokes on the cap prevent a smooth helmet-like highlight.
+    # No fringe or ponytail. Short swept scalp strokes stay inside the hairline.
     strokes=Strands()
     for j,x in enumerate(np.linspace(-.48,.48,65)):
         pts=[]
         for t in np.linspace(0,1,14):
             xx=x*(1-.25*t)
-            yy=6.24+.33*t
-            pts.append(skin_point(xx,yy,.0044))
+            yy=6.35+.22*t
+            pts.append(skin_point(xx,yy,.0028))
         strokes.add(pts,[.00012]*len(pts),5)
     strokes.mesh('Hair_Fine_Strokes',make_mesh,hair)
     brow_mat=material('Natural dark eyebrows',(.040,.027,.020),.86)
@@ -187,7 +173,7 @@ def add_face_and_hair(body, cap, hair, scale, low, make_mesh, material):
     brows.mesh('Eyebrows',make_mesh,brow_mat)
     upper.mesh('Upper_Eyelashes',make_mesh,lash_mat)
     lower.mesh('Lower_Eyelashes',make_mesh,lash_mat)
-    return {'hairstyle':'High ponytail with nine separated wispy bang locks and fine cap strokes',
+    return {'hairstyle':'Close-fitting swept short hair, curved frontal and nuchal hairlines; no bangs or ponytail',
             'eyebrows':'420 fine body-fitted tapered hairs over a soft baked brow tint',
             'eyelashes':{'upper':54,'lower':28},'attachment':'Ray cast to refined adult body surface',
             'age':'adult, 20–25 years','not_a_real_person':True}

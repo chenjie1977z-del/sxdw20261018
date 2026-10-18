@@ -6,10 +6,34 @@
 <style>
 [hidden]{display:none!important}.tool-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.tool-buttons button{padding:7px 5px;font-size:12px}.field{display:block;margin:10px 0;font-size:12px;color:var(--muted)}.field input[type=text],.field select,#annotation-pages{width:100%;padding:7px;border:1px solid var(--line);border-radius:6px;background:white;color:var(--ink);font:inherit}.field input[type=color]{width:42px;height:30px;vertical-align:middle;border:0;background:none}.field input[type=range]{width:125px;vertical-align:middle;accent-color:var(--accent)}.teach-note{font-size:12px;color:var(--muted);padding:8px 0;margin:0}.stage.teaching #labels{display:none}#annotation-canvas{position:absolute;inset:0;z-index:2;display:none;touch-action:none;width:100%;height:100%}.stage-top,.stage-bottom{z-index:3}.stage.teaching .stage-top,.stage.teaching .stage-bottom{display:none}#message{z-index:6}.save-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.save-row button{font-size:12px;padding:7px}.teaching-divider{margin:18px 0;border:0;border-top:1px solid var(--line)}
 </style></head><body>
-<header><div><h1>女性人体 · 3D 教学标注</h1><p>亚洲成年女性体表 · 旋转观察与固定视角课件</p></div><span class="badge">优化版 04 · 面容与体表</span></header>
+<header><div><h1>女性人体 · 3D 教学标注</h1><p>亚洲成年女性体表 · 三维锚定与固定视角课件</p></div><span class="badge">优化版 05 · 三维表面标注</span></header>
 <main><aside>
-<h2>教学课件</h2><button class="wide" id="annotate-view" disabled>标注当前视角</button><button class="wide" id="return-3d" hidden>返回 3D 旋转 / 换视角</button><button class="wide" id="resume-annotations" disabled>继续已有标注页</button>
-<p class="teach-note" id="annotation-help">先旋转、放大到需要的位置，再建立标注页。关闭前请保存课件。</p>
+<section id="anchor-panel">
+<h2>三维表面标注 · 随旋转保留</h2>
+<div class="tool-buttons"><button data-anchor-tool="rotate" class="active">旋转观察</button><button data-anchor-tool="select">选择 / 拖动</button><button data-anchor-tool="label">定位与文字</button><button data-anchor-tool="curve">两点连线</button><button data-anchor-tool="pen">体表描线</button></div>
+<p class="teach-note">先选工具、填文字，再点体表。连线依次点两点，描线按住拖画。完成后点“旋转观察”，标注仍在。选择模式：拖端点重新贴肤，拖文字移动标签，拖线或 Shift 拖动整体移位。</p>
+<label class="field">已有标注<select id="anchor-list" aria-label="已有三维标注"></select></label>
+<label class="field">文字<input id="anchor-text" maxlength="80" type="text" placeholder="如：锁骨下窝"></label>
+<label class="field">颜色 <input id="anchor-color" type="color" value="#ffb44d"></label>
+<label class="field">文字 / 点 / 线宽大小 <span id="anchor-size-value">1.0</span><input id="anchor-size" aria-label="三维标注大小" type="range" min="0.3" max="3" step="0.1" value="1"></label>
+<div class="save-row"><button id="anchor-shrink">描线范围 −</button><button id="anchor-grow">描线范围 ＋</button></div>
+<label class="field">连线弧度 <span id="anchor-bend-value">0.00</span><input id="anchor-bend" aria-label="连线弧度" type="range" min="-0.8" max="0.8" step="0.02" value="0"></label>
+<label class="switch">连线贴合体表<input id="anchor-follow" type="checkbox" checked></label>
+<label class="switch">连线末端箭头<input id="anchor-arrow" type="checkbox"></label>
+<label class="switch">显示等分刻度<input id="anchor-ticks" type="checkbox"></label>
+<label class="field">等分段数<select id="anchor-divisions"><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>8</option><option>10</option><option>12</option><option>20</option></select></label>
+<label class="switch">描线闭合成圈<input id="anchor-closed" type="checkbox"></label>
+<label class="switch">显示选中标注<input id="anchor-item-visible" type="checkbox" checked></label>
+<label class="switch">显示全部三维标注<input id="anchor-visible" type="checkbox" checked></label>
+<label class="switch">身体遮挡时隐藏<input id="anchor-occlude" type="checkbox" checked></label>
+<p class="teach-note" id="anchor-warning"></p><p class="teach-note" id="anchor-count">0 条三维标注</p>
+<div class="save-row"><button id="anchor-undo">撤销</button><button id="anchor-redo">重做</button><button id="anchor-delete">删除选中</button><button id="anchor-clear">清空（可撤销）</button><button id="anchor-save">保存三维课件</button><button id="anchor-load">导入三维课件</button></div>
+<input type="file" id="anchor-file" accept=".json,application/json" hidden>
+<p class="teach-note">关闭前请保存。三维课件与下方二维课件分别保存；等分刻度仅为曲线分段示意。</p>
+<hr class="teaching-divider"></section>
+<section id="background-controls"><h2>背景色</h2><div class="tool-buttons"><button data-theme="ivory" class="active">暖白</button><button data-theme="slate">浅暗蓝灰</button><button data-theme="mist">更浅暗灰</button></div></section>
+<h2>二维截图课件</h2><button class="wide" id="annotate-view" disabled>二维截图板书（固定视角）</button><button class="wide" id="return-3d" hidden>返回 3D（锚定标注保留）</button><button class="wide" id="resume-annotations" disabled>继续已有二维标注页</button>
+<p class="teach-note" id="annotation-help">此处用于固定视角板书与 Excalidraw 导出；随旋转的标注请使用上方三维工具。关闭前请分别保存课件。</p>
 <div id="annotation-tools" hidden>
 <label class="field">课件页面<select id="annotation-pages" aria-label="课件页面"></select></label>
 <div class="tool-buttons"><button data-annotation-tool="select">选择 / 移动 V</button><button data-annotation-tool="pen" class="active">画笔 P</button><button data-annotation-tool="highlighter">荧光笔 H</button><button data-annotation-tool="arrow">箭头 A</button><button data-annotation-tool="rectangle">矩形 R</button><button data-annotation-tool="ellipse">椭圆 O</button><button data-annotation-tool="text">文字 T</button><button data-annotation-tool="eraser">擦除对象 E</button></div>
@@ -27,6 +51,7 @@
 <button class="wide" data-view="shoulder">肩背局部</button>
 <div class="buttons" style="margin-top:7px"><button data-view="face">面部与发丝</button><button data-view="neck">锁骨与颈部</button></div>
 <button class="wide" data-view="thighs">大腿与膝部</button><button class="wide" id="reset">全身复位</button>
+<div class="buttons" style="margin-top:7px"><button data-view="abdomen">肚脐与腹部</button><button data-view="kneeback">腘窝与横纹</button><button data-view="wrist">掌侧腕横纹</button></div>
 <h2>表面显示</h2><div class="buttons"><button data-mode="skin" class="active">自然肤色</button><button data-mode="clay">石膏研究</button></div>
 <label class="switch">线框拓扑<input type="checkbox" id="wire"></label><label class="switch">示意观察点<input type="checkbox" id="markers"></label><label class="switch">地面网格<input type="checkbox" id="grid" checked></label><label class="switch">自动旋转<input type="checkbox" id="rotate"></label><label class="switch">透视观察<input type="checkbox" id="perspective"></label>
 <h2>检查与导出</h2><button class="wide" id="measure">两点直线测距</button><div class="measure" id="measurement">点击表面选取两点；数值仅属于这个合成模型。</div><button class="wide" id="export">导出 4K PNG</button>
@@ -34,5 +59,6 @@
 </div>
 <p class="note">体表概念样稿，未通过专业解剖校核。标记仅示意观察区域；本版不含内部骨骼、肌肉或医学测量数据。</p>
 </aside><section class="stage" aria-label="可交互的三维人体"><div id="viewport"></div><canvas id="annotation-canvas" aria-label="教学标注画布"></canvas><div id="labels"></div><div class="stage-top"><div class="eyebrow">SURFACE ANATOMY / FEMALE</div><div id="view-name">正面观察</div></div><div class="stage-bottom"><span class="hint">拖动模型开始观察</span><span id="status">模型加载中</span></div><div id="loading"><div><div class="spinner"></div><div id="load-text">正在准备三维模型…</div></div></div><div id="message" role="status"></div></section></main>
+<style>.stage[data-theme=slate],.stage[data-theme=mist]{color:#edf2f5}.stage[data-theme=slate] .stage-top .eyebrow,.stage[data-theme=mist] .stage-top .eyebrow,.stage[data-theme=slate] .stage-bottom,.stage[data-theme=mist] .stage-bottom{color:#d4e0e6}.landmark,#loading{color:#203b3c}.field input[type=range]{display:block;width:100%;margin-top:7px}#anchor-warning{color:#91551f}#anchor-panel .switch{font-size:12px;margin:9px 0}#anchor-panel .teach-note{line-height:1.7}#anchor-panel h2{margin-top:0}</style>
 <script>window.__MODEL_BASE64__='__MODEL_BASE64__';</script><script>/*__BUNDLE__*/</script>
 </body></html>

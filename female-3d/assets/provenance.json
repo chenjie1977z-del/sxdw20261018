@@ -112,6 +112,21 @@
       "path": "assets/source/targets/head/head-oval.target",
       "sha256": "a17cd3a600588a344babe520fbd4d4edcb096db3328051fe692dfb997a1a678d",
       "source_path": "makehuman/data/targets/head/head-oval.target"
+    },
+    {
+      "path": "assets/source/targets/mouth/mouth-upperlip-height-incr.target",
+      "sha256": "4eed688bb333c53b579e06bc1c555a5d01a61dbe3f9702aa4e1340384c597c49",
+      "source_path": "makehuman/data/targets/mouth/mouth-upperlip-height-incr.target"
+    },
+    {
+      "path": "assets/source/targets/mouth/mouth-upperlip-volume-incr.target",
+      "sha256": "b124cbd9b9be318264f61a143da603b42e0357ed92b4b6afd1b31a83daaf8568",
+      "source_path": "makehuman/data/targets/mouth/mouth-upperlip-volume-incr.target"
+    },
+    {
+      "path": "assets/source/targets/stomach/stomach-navel-in.target",
+      "sha256": "ed81ff7be117fbb1049152a465f22ee04dd1137bf5d23d75b78591e7c989a6dd",
+      "source_path": "makehuman/data/targets/stomach/stomach-navel-in.target"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "revision": 4,
+  "revision": 5,
   "adult_age_range_years": [
     20,
     25
@@ -59,7 +59,19 @@
     },
     {
       "file": "mouth/mouth-angles-up.target",
-      "weight": 0.08
+      "weight": 0.16
+    },
+    {
+      "file": "mouth/mouth-upperlip-height-incr.target",
+      "weight": 0.22
+    },
+    {
+      "file": "mouth/mouth-upperlip-volume-incr.target",
+      "weight": 0.22
+    },
+    {
+      "file": "stomach/stomach-navel-in.target",
+      "weight": 0.3
     },
     {
       "file": "armslegs/l-upperleg-muscle-incr.target",
@@ -95,13 +107,18 @@
       "sternocleidomastoid relief",
       "scapular spine and medial border relief",
       "lumbar dimples",
-      "quadriceps relief"
+      "quadriceps relief",
+      "umbilicus",
+      "patellar contour",
+      "popliteal crease",
+      "palmar wrist creases",
+      "anterior axillary fold"
     ],
-    "max_absolute_displacement_m": 0.003671986749395728,
+    "max_absolute_displacement_m": 0.0038730299565941095,
     "professionally_validated": false
   },
   "face_and_hair": {
-    "hairstyle": "High ponytail with nine separated wispy bang locks and fine cap strokes",
+    "hairstyle": "Close-fitting swept short hair, curved frontal and nuchal hairlines; no bangs or ponytail",
     "eyebrows": "420 fine body-fitted tapered hairs over a soft baked brow tint",
     "eyelashes": {
       "upper": 54,
@@ -137,14 +154,6 @@
       "triangles": 11998
     },
     {
-      "name": "Hair_Ponytail",
-      "triangles": 13570
-    },
-    {
-      "name": "Hair_Wispy_Bangs",
-      "triangles": 10080
-    },
-    {
       "name": "Hair_Fine_Strokes",
       "triangles": 8840
     },
@@ -161,5 +170,5 @@
       "triangles": 1008
     }
   ],
-  "total_rendered_triangles": 498808
+  "total_rendered_triangles": 475158
 }

@@ -3,7 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "scripts": {"build": "node scripts/build_viewer.mjs"},
-  "dependencies": {"three": "0.180.0"},
-  "devDependencies": {"esbuild": "0.25.10"}
+  "scripts": {
+    "build": "node scripts/build_viewer.mjs"
+  },
+  "dependencies": {
+    "three": "0.180.0",
+    "three-mesh-bvh": "^0.9.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
 }
